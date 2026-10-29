@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/Endika/txiki/compare/v0.2.0...v0.3.0) (2026-10-29)
+
+
+### Features
+
+* add create and click edge functions ([d6a19ea](https://github.com/Endika/txiki/commit/d6a19ea57ba3e9e4ead2b5b12da47076f44106b0))
+
 ## [0.2.0](https://github.com/Endika/txiki/compare/v0.1.0...v0.2.0) (2026-10-29)
 
 
