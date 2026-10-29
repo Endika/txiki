@@ -8,6 +8,8 @@
     "src",
     "tests",
     "supabase/functions/_shared/**/*.ts",
+    "supabase/functions/deno.d.ts",
+    "supabase/functions/txiki-create/index.ts",
     "vitest.config.ts",
     "vite.config.ts"
   ],
