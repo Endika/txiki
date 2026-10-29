@@ -85,7 +85,30 @@ declare v text; bad text[] := array[
     'https://x/ y', 'https://x/' || chr(10), 'https://x/' || chr(127),
     'https://endika.github.io/txiki/#abc', 'https://Endika.GitHub.io/txiki',
     'https://user@endika.github.io:443/txiki/x', 'https://', 'http:///x', '',
-    'https://x/' || repeat('a', 2039)];
+    'https://x/' || repeat('a', 2039),
+    'https://endika.github.io\txiki/#abc',
+    'https://endika.github.io/./txiki/#abc',
+    'https://endika.github.io/a/../txiki/#abc',
+    'https://endika%2Egithub.io/txiki/#abc',
+    'https://ｅｎｄｉｋａ.github.io/txiki/#abc',
+    'https://endika.github.io//txiki/#abc',
+    'https://endika.github.io/%74xiki/#abc',
+    'https://endika.github.io./txiki/#abc',
+    'https://ENDIKA.github.io:443/Txiki',
+    'https://endika.github.io/a/.',
+    'https://endika.github.io/a/..',
+    'https://endika.github.io/a%2Fb',
+    'https://x/'||chr(160),
+    'https://x/'||U&'\200B',
+    'https://x/'||U&'\FEFF',
+    'https://x/'||U&'\202E',
+    'https://ñandú.es/',
+    'https://@/x',
+    'http://:80',
+    'https://[zz]/x',
+    'https://exa_mple.com/',
+    'https://a\b.com/',
+    'https://a%41.com/'];
 begin
   perform t.reset();
   foreach v in array bad loop
@@ -94,6 +117,7 @@ begin
   end loop;
   assert t.err('select * from txiki.create_link(null, false, ''198.51.100.1'')') = 'invalid target',
     'null target rejected';
+  assert t.err('select * from txiki.create_link(''https://x.es'', false, null)') = 'invalid ip', 'null ip rejected';
   assert (select count(*) from txiki.links) = 0, 'nothing stored for rejected targets';
   assert (select count(*) from txiki.create_log) = 0, 'rejected targets do not count for the rate limit';
 
@@ -103,13 +127,17 @@ begin
     'uppercase scheme is fine';
   assert t.err('select * from txiki.create_link(''https://endika.github.io/other'', false, ''198.51.100.1'')') is null,
     'other paths on endika.github.io are fine';
+  assert t.err('select * from txiki.create_link(''https://endika.github.io/other-project/'', false, ''198.51.100.1'')') is null,
+    'other projects on endika.github.io are fine';
+  assert t.err('select * from txiki.create_link(''https://[2001:db8::1]:8080/x'', false, ''198.51.100.1'')') is null,
+    'bracketed ipv6 host is fine';
   assert t.err('select * from txiki.create_link(''https://endika.github.io'', false, ''198.51.100.1'')') is null,
     'endika.github.io root is fine';
   raise notice 'PASS: invalid targets';
 end $$;
 
 do $$
-declare r record; v_target text := 'https://ñandú.es/a?b=1#c';
+declare r record; v_target text := 'https://xn--and-6ma2c.es/a?b=1#c';
 begin
   perform t.reset();
   select * into r from txiki.create_link(v_target, false, '198.51.100.1');
@@ -236,8 +264,8 @@ begin
   assert v_stats->'countries'->1 = '{"key": null, "count": 1}'::jsonb, 'null keys come out as null';
   assert v_stats->'referrers'->0 = '{"key": "T.co", "count": 3}'::jsonb, 'referrers';
   assert jsonb_array_length(v_stats->'recent') = 4, 'recent lists the clicks';
-  assert (v_stats->'recent'->0) ? 'referrer_host', 'recent has referrer_host';
-  assert not ((v_stats->'recent'->0) ? 'visitor'), 'recent does not leak the visitor';
+  assert (select array_agg(k order by k) from jsonb_object_keys(v_stats->'recent'->0) k)
+    = array['at', 'browser', 'country', 'device', 'os', 'referrer_host'], 'recent has exactly these keys';
 
   insert into txiki.clicks (code, browser, os, device, visitor)
   select r.code, 'Chrome', 'Linux', 'desktop', '\x03' from generate_series(1, 60);
@@ -249,6 +277,21 @@ begin
   select r.code, 'Chrome', 'Linux', 'desktop', '\x03', 40.42, -3.70 from generate_series(1, 510);
   v_stats := txiki.link_stats(r.code, r.token, 'UTC');
   assert jsonb_array_length(v_stats->'points') = 500, 'points are capped at 500';
+  perform t.reset();
+  select * into r from t.mk();
+  insert into txiki.clicks (code, browser, os, device, visitor, lang)
+  select r.code, 'Chrome', 'Linux', 'desktop', '\x03', 'l' || lpad(g::text, 2, '0')
+  from generate_series(1, 60) g;
+  v_stats := txiki.link_stats(r.code, r.token, 'UTC');
+  assert jsonb_array_length(v_stats->'langs') = 51, 'langs capped at 50 plus the remainder';
+  assert v_stats->'langs'->50 = '{"key": "__other__", "count": 10}'::jsonb, 'remainder is folded into __other__';
+  assert v_stats->'langs'->0->>'key' = 'l01', 'ties sort by key';
+  insert into txiki.clicks (code, browser, os, device, visitor, lang)
+  select r.code, 'Chrome', 'Linux', 'desktop', '\x03', 'l01' from generate_series(1, 3);
+  v_stats := txiki.link_stats(r.code, r.token, 'UTC');
+  assert v_stats->'langs'->0 = '{"key": "l01", "count": 4}'::jsonb, 'top entries sort by count desc';
+  assert jsonb_array_length(v_stats->'browsers') = 1 and not (v_stats->'browsers' @> '[{"key": "__other__"}]'),
+    'no __other__ without a remainder';
   raise notice 'PASS: stats shape';
 end $$;
 
@@ -375,6 +418,15 @@ begin
     end loop;
   end loop;
 
+  assert (select array_agg(p.proname::text order by p.proname) from pg_proc p
+          where p.pronamespace = 'txiki'::regnamespace and has_function_privilege('anon', p.oid, 'execute'))
+    = array['add_location', 'delete_link', 'link_stats'], 'anon runs exactly three functions';
+  assert (select count(*) from pg_proc p
+          where p.pronamespace = 'txiki'::regnamespace and has_function_privilege('authenticated', p.oid, 'execute')) = 0,
+    'authenticated runs nothing';
+  assert (select array_agg(p.proname::text order by p.proname) from pg_proc p
+          where p.pronamespace = 'txiki'::regnamespace and has_function_privilege('service_role', p.oid, 'execute'))
+    = array['create_link', 'record_click'], 'service_role runs exactly two functions';
   assert not has_function_privilege('anon', 'txiki.create_link(text,bool,text)', 'execute'), 'anon create_link';
   assert not has_function_privilege('anon',
     'txiki.record_click(text,text,text,text,text,text,text,text,text)', 'execute'), 'anon record_click';

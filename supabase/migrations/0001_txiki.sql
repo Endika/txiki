@@ -119,6 +119,7 @@ as $$
 #variable_conflict use_column
 declare
   v_today date := (now() at time zone 'UTC')::date;
+  v_authority text;
   v_host text;
   v_path text;
   v_ip bytea := convert_to(coalesce(p_ip, ''), 'UTF8');
@@ -130,17 +131,44 @@ declare
 begin
   if p_target is null
     or length(p_target) > 2048
-    or p_target ~ '[[:space:][:cntrl:]]'
-    or lower(p_target) !~ '^https?://[^/?#]+'
+    or p_target !~ '^[\x21-\x7e]+$'
+    or lower(p_target) !~ '^https?://'
   then
     raise exception 'invalid target';
   end if;
 
-  v_host := lower(substring(p_target from '^[A-Za-z]+://([^/?#]*)'));
-  v_host := regexp_replace(regexp_replace(v_host, '^.*@', ''), ':[0-9]*$', '');
-  v_path := lower(coalesce(substring(p_target from '^[A-Za-z]+://[^/?#]*(/[^?#]*)'), ''));
-  if v_host = 'endika.github.io' and v_path like '/txiki%' then
+  v_authority := substring(p_target from '^[A-Za-z]+://([^/?#]*)');
+  if v_authority ~ '[\\%]' then
     raise exception 'invalid target';
+  end if;
+  v_host := lower(regexp_replace(v_authority, '^.*@', ''));
+  if v_host like '[%' then
+    v_host := substring(v_host from '^(\[[^]]*\])(?::[0-9]*)?$');
+    if v_host is null or v_host !~ '^\[[0-9a-f:.]+\]$' then
+      raise exception 'invalid target';
+    end if;
+  else
+    v_host := regexp_replace(regexp_replace(v_host, ':[0-9]*$', ''), '\.$', '');
+    if v_host !~ '^[a-z0-9.-]+$' then
+      raise exception 'invalid target';
+    end if;
+  end if;
+
+  v_path := lower(coalesce(substring(p_target from '^[A-Za-z]+://[^/?#]*(/[^?#]*)'), ''));
+  if v_host = 'endika.github.io' and (
+    v_path like '/txiki%'
+    or v_path like '%\%%'
+    or v_path like '%//%'
+    or v_path like '%/./%'
+    or v_path like '%/../%'
+    or v_path like '%/.'
+    or v_path like '%/..'
+  ) then
+    raise exception 'invalid target';
+  end if;
+
+  if p_ip is null then
+    raise exception 'invalid ip';
   end if;
 
   perform pg_advisory_xact_lock(hashtext('txiki.create_link'));
@@ -271,6 +299,22 @@ begin
 end;
 $$;
 
+create function txiki.top_list(p_items jsonb) returns jsonb
+language sql
+immutable
+security definer
+set search_path = ''
+as $$
+  select case
+    when jsonb_array_length(p_items) <= 50 then p_items
+    else (
+      select jsonb_agg(t.e order by t.o) from jsonb_array_elements(p_items) with ordinality t (e, o) where t.o <= 50
+    ) || jsonb_build_array(jsonb_build_object('key', '__other__', 'count', (
+      select sum((t.e ->> 'count')::bigint) from jsonb_array_elements(p_items) with ordinality t (e, o) where t.o > 50
+    )))
+  end
+$$;
+
 create function txiki.link_stats(p_code text, p_token text, p_tz text)
 returns jsonb
 language plpgsql
@@ -324,32 +368,36 @@ begin
         from txiki.clicks c where c.code = p_code group by 1
       ) s on s.hr = h.h
     ),
-    'countries', (
+    'countries', txiki.top_list((
       select coalesce(jsonb_agg(jsonb_build_object('key', s.k, 'count', s.n) order by s.n desc, s.k), '[]'::jsonb)
       from (select c.country k, count(*) n from txiki.clicks c where c.code = p_code group by 1) s
-    ),
-    'browsers', (
+    )),
+    'browsers', txiki.top_list((
       select coalesce(jsonb_agg(jsonb_build_object('key', s.k, 'count', s.n) order by s.n desc, s.k), '[]'::jsonb)
       from (select c.browser k, count(*) n from txiki.clicks c where c.code = p_code group by 1) s
-    ),
-    'os', (
+    )),
+    'os', txiki.top_list((
       select coalesce(jsonb_agg(jsonb_build_object('key', s.k, 'count', s.n) order by s.n desc, s.k), '[]'::jsonb)
       from (select c.os k, count(*) n from txiki.clicks c where c.code = p_code group by 1) s
-    ),
-    'devices', (
+    )),
+    'devices', txiki.top_list((
       select coalesce(jsonb_agg(jsonb_build_object('key', s.k, 'count', s.n) order by s.n desc, s.k), '[]'::jsonb)
       from (select c.device k, count(*) n from txiki.clicks c where c.code = p_code group by 1) s
-    ),
-    'referrers', (
+    )),
+    'referrers', txiki.top_list((
       select coalesce(jsonb_agg(jsonb_build_object('key', s.k, 'count', s.n) order by s.n desc, s.k), '[]'::jsonb)
       from (select c.referrer_host k, count(*) n from txiki.clicks c where c.code = p_code group by 1) s
-    ),
-    'langs', (
+    )),
+    'langs', txiki.top_list((
       select coalesce(jsonb_agg(jsonb_build_object('key', s.k, 'count', s.n) order by s.n desc, s.k), '[]'::jsonb)
       from (select c.lang k, count(*) n from txiki.clicks c where c.code = p_code group by 1) s
-    ),
+    )),
     'recent', (
-      select coalesce(jsonb_agg(to_jsonb(s) order by s.at desc, s.id desc), '[]'::jsonb)
+      select coalesce(jsonb_agg(
+        jsonb_build_object(
+          'at', s.at, 'country', s.country, 'browser', s.browser, 'os', s.os,
+          'device', s.device, 'referrer_host', s.referrer_host
+        ) order by s.at desc, s.id desc), '[]'::jsonb)
       from (
         select c.id, c.at, c.country, c.browser, c.os, c.device, c.referrer_host
         from txiki.clicks c where c.code = p_code
