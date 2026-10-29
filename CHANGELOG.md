@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/Endika/txiki/compare/v0.1.0...v0.2.0) (2026-10-29)
+
+
+### Features
+
+* add shared edge function helpers ([3b85b28](https://github.com/Endika/txiki/commit/3b85b28dac9520e6c00c2c92ac2c5ab702315136))
+
 ## 0.1.0 (2026-10-29)
 
 
