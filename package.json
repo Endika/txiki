@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "lint": "eslint src tests --max-warnings 0 --no-error-on-unmatched-pattern",
+    "lint": "eslint src tests supabase/functions --max-warnings 0",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "type:check": "tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.test.json",
