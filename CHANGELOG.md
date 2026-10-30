@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.0](https://github.com/Endika/txiki/compare/v0.13.0...v0.14.0) (2026-10-30)
+
+
+### Features
+
+* **qr:** add QR codes for short and channel links ([0d10065](https://github.com/Endika/txiki/commit/0d10065632ef1f14118e075d9861a71ea9cbbace))
+
 ## [0.13.0](https://github.com/Endika/txiki/compare/v0.12.0...v0.13.0) (2026-10-30)
 
 
