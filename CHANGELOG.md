@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.1](https://github.com/Endika/txiki/compare/v0.8.0...v0.8.1) (2026-10-30)
+
+
+### Bug Fixes
+
+* reject Turnstile tokens issued for other hostnames ([142855b](https://github.com/Endika/txiki/commit/142855b4a377a96e623ff59e6e879d3b99c5b5c9))
+
 ## [0.8.0](https://github.com/Endika/txiki/compare/v0.7.0...v0.8.0) (2026-10-30)
 
 
