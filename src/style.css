@@ -302,6 +302,11 @@ legend {
   margin-bottom: 6px;
 }
 
+.label svg {
+  margin-right: 6px;
+  vertical-align: -2px;
+}
+
 .field {
   width: 100%;
   min-width: 0;

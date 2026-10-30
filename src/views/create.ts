@@ -182,13 +182,18 @@ export function createView(container: HTMLElement, deps: ViewDeps): View {
         h(
           'div',
           {},
-          h('label', { class: 'label', id: 'key-label', for: 'stats-link' }, t('keyLabel')),
+          h(
+            'label',
+            { class: 'label', id: 'key-label', for: 'stats-link' },
+            icon('lock'),
+            t('keyLabel'),
+          ),
           h(
             'div',
             { class: 'copyrow' },
             keyField,
             keyFallback,
-            copyButton(done.stats, keyFallback, 'copy', keyNote),
+            copyButton(done.stats, keyFallback, 'copy', keyNote, 'lock'),
           ),
           keyNote,
         ),

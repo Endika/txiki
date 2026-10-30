@@ -40,7 +40,7 @@ export const es = {
   readyLead:
     'Compártelo donde quieras. Cada vez que alguien lo abra, lo verás en sus estadísticas.',
   shortLinkLabel: 'Enlace corto',
-  keyLabel: 'Llave de las estadísticas',
+  keyLabel: 'Llave privada de las estadísticas',
   copy: 'Copiar',
   copied: 'Copiado',
   copyFailed: 'Seleccionado: pulsa Ctrl+C para copiar.',
@@ -104,8 +104,10 @@ export const es = {
   statsLoading: 'Cargando las estadísticas…',
   statsCreated: 'creado el {date}',
   statsAsksLocation: 'pide ubicación',
-  copyLink: 'Copiar link',
-  copyKey: 'Copiar llave',
+  copyLink: 'Copiar enlace',
+  copyKey: 'Copiar llave privada',
+  keysHint:
+    'El enlace corto es para compartir. La llave es privada: con ella se ven estas estadísticas y se puede borrar el link.',
   disabledBand: 'Este link está desactivado y ya no redirige. Sus estadísticas siguen disponibles.',
   answerTimes_one: 'Lo han abierto una vez,',
   answerTimes_other: 'Lo han abierto {n} veces,',

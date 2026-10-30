@@ -6,20 +6,21 @@ export function copyButton(
   fallbackTarget: HTMLElement,
   key: MessageKey = 'copy',
   note?: HTMLElement,
+  glyph: 'copy' | 'lock' = 'copy',
 ): HTMLButtonElement {
   const label = h('span', {}, t(key))
-  const button = h('button', { type: 'button', class: 'mini' }, icon('copy'), label)
+  const button = h('button', { type: 'button', class: 'mini' }, icon(glyph), label)
   let timer: ReturnType<typeof setTimeout> | undefined
   button.addEventListener('click', async () => {
     const ok = await copyText(text, fallbackTarget)
     clearTimeout(timer)
     label.textContent = ok ? t('copied') : t(key)
-    button.replaceChildren(icon(ok ? 'check' : 'copy'), label)
+    button.replaceChildren(icon(ok ? 'check' : glyph), label)
     if (note) note.textContent = ok ? '' : t('copyFailed')
     if (ok) {
       timer = setTimeout(() => {
         label.textContent = t(key)
-        button.replaceChildren(icon('copy'), label)
+        button.replaceChildren(icon(glyph), label)
       }, 2000)
     }
   })

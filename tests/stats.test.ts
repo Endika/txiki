@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { NetworkError, type Stats, type TxikiApi } from '@/api'
 import { localDay } from '@/format'
+import { icon } from '@/dom'
 import { t } from '@/i18n'
 import { loadLinks, saveLink } from '@/storage'
 import { $, NOW, emptyStats, mount, newFake, settle, type Harness } from './helpers'
@@ -317,6 +318,17 @@ describe('stats view details', () => {
       expect(input.getAttribute('aria-hidden')).toBeNull()
     }
     expect(inputs[1]!.value.endsWith(`#s/${CODE}.${TOKEN}`)).toBe(true)
+  })
+
+  it('marks the key as private and says what each copy is for', async () => {
+    h = mount({ hash: HASH, api: serving(busy()) })
+    await settle()
+    const [linkBtn, keyBtn] = [...h.root.querySelectorAll<HTMLButtonElement>('.actions button')]
+    expect(linkBtn!.textContent).toBe('Copiar enlace')
+    expect(keyBtn!.textContent).toBe('Copiar llave privada')
+    expect(keyBtn!.querySelector('svg')!.outerHTML).toBe(icon('lock').outerHTML)
+    expect(linkBtn!.querySelector('svg')!.outerHTML).toBe(icon('copy').outerHTML)
+    expect(h.root.textContent).toContain('El enlace corto es para compartir. La llave es privada')
   })
 
   it('translates the server’s Other, names languages and handles unknown countries', async () => {
