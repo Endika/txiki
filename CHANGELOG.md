@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.0](https://github.com/Endika/txiki/compare/v0.5.0...v0.6.0) (2026-10-30)
+
+
+### Features
+
+* add world map geometry and layout helpers ([59599c6](https://github.com/Endika/txiki/commit/59599c6b8136a50f8d1f5388cb719ea3595e31d1))
+* show a world map of clicks on the stats page ([eb02235](https://github.com/Endika/txiki/commit/eb022357bf10a99b58a20b5fe10331dfafa4bbb0))
+
 ## [0.5.0](https://github.com/Endika/txiki/compare/v0.4.0...v0.5.0) (2026-10-30)
 
 
