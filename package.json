@@ -13,6 +13,7 @@
     "type:check": "tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.test.json",
     "test:run": "vitest run",
     "test:sql": "bash scripts/test-sql.sh",
+    "test:geo-db": "bash scripts/test-geo-db.sh",
     "secret-scan": "node scripts/secret-scan.mjs",
     "prepare": "husky"
   },
