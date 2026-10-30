@@ -121,6 +121,7 @@ export function emptyStats(overrides: Partial<Stats> = {}): Stats {
     total: 0,
     uniques: 0,
     bots: 0,
+    note: null,
     firstAt: null,
     lastAt: null,
     byDay: [],

@@ -14,6 +14,7 @@ export type Stats = {
   total: number
   uniques: number
   bots: number
+  note: string | null
   firstAt: string | null
   lastAt: string | null
   byDay: { day: string; count: number }[]
@@ -48,6 +49,7 @@ export interface TxikiApi {
   addLocation(token: string, lat: number, lon: number): Promise<boolean>
   stats(code: string, token: string, tz: string): Promise<Stats | null>
   remove(code: string, token: string): Promise<boolean>
+  setNote(code: string, token: string, note: string | null): Promise<boolean>
 }
 
 export class NetworkError extends Error {
