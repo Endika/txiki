@@ -408,6 +408,38 @@ begin
 end $$;
 
 do $$
+declare r record; v_note text := repeat('A', 22); v text; bad text;
+begin
+  perform t.reset();
+  select * into r from t.mk();
+  set role anon;
+  assert txiki.link_stats(r.code, r.token, 'UTC') ? 'note' and txiki.link_stats(r.code, r.token, 'UTC')->'note' = 'null'::jsonb,
+    'a new link has a null note';
+  assert txiki.set_note(r.code, r.token, v_note), 'good token sets the note';
+  assert txiki.link_stats(r.code, r.token, 'UTC')->>'note' = v_note, 'link_stats returns the note';
+  assert txiki.set_note(r.code, r.token, repeat('b-_9', 150)), 'the maximum length fits';
+  assert not txiki.set_note(r.code, repeat('A', 43), 'Z' || v_note), 'wrong token is false';
+  assert not txiki.set_note(r.code, 'short', 'Z' || v_note), 'malformed token is false';
+  assert not txiki.set_note(r.code, null, 'Z' || v_note), 'null token is false';
+  assert not txiki.set_note('nope123', r.token, v_note), 'unknown code is false';
+  assert length(txiki.link_stats(r.code, r.token, 'UTC')->>'note') = 600, 'the note is unchanged by failed calls';
+  assert txiki.set_note(r.code, r.token, null), 'null clears the note';
+  assert txiki.link_stats(r.code, r.token, 'UTC')->'note' = 'null'::jsonb, 'note is null after null';
+  assert txiki.set_note(r.code, r.token, v_note) and txiki.set_note(r.code, r.token, ''), 'empty string clears the note';
+  assert txiki.link_stats(r.code, r.token, 'UTC')->'note' = 'null'::jsonb, 'note is null after empty string';
+  reset role;
+  assert (select note from txiki.links) is null, 'empty string is stored as null';
+  foreach bad in array array[repeat('A', 21), repeat('A', 601), repeat('A', 21) || '+', repeat('A', 22) || '=', repeat('A', 21) || ' '] loop
+    set role anon;
+    v := t.err(format('select txiki.set_note(%L, %L, %L)', r.code, r.token, bad));
+    reset role;
+    assert v like '%links_note_check%', 'malformed note raises: ' || length(bad) || ' ' || coalesce(v, 'no error');
+  end loop;
+  assert (select note from txiki.links) is null, 'malformed notes are not stored';
+  raise notice 'PASS: set_note';
+end $$;
+
+do $$
 declare tbl text; priv text; rl text;
 begin
   foreach rl in array array['anon', 'authenticated', 'service_role'] loop
@@ -420,7 +452,7 @@ begin
 
   assert (select array_agg(p.proname::text order by p.proname) from pg_proc p
           where p.pronamespace = 'txiki'::regnamespace and has_function_privilege('anon', p.oid, 'execute'))
-    = array['add_location', 'delete_link', 'link_stats'], 'anon runs exactly three functions';
+    = array['add_location', 'delete_link', 'link_stats', 'set_note'], 'anon runs exactly four functions';
   assert (select count(*) from pg_proc p
           where p.pronamespace = 'txiki'::regnamespace and has_function_privilege('authenticated', p.oid, 'execute')) = 0,
     'authenticated runs nothing';
@@ -440,6 +472,9 @@ begin
   assert has_function_privilege('anon', 'txiki.link_stats(text,text,text)', 'execute'), 'anon link_stats';
   assert has_function_privilege('anon', 'txiki.delete_link(text,text)', 'execute'), 'anon delete_link';
   assert has_function_privilege('anon', 'txiki.add_location(text,float8,float8)', 'execute'), 'anon add_location';
+  assert has_function_privilege('anon', 'txiki.set_note(text,text,text)', 'execute'), 'anon set_note';
+  assert not has_function_privilege('authenticated', 'txiki.set_note(text,text,text)', 'execute'), 'authenticated set_note';
+  assert not has_function_privilege('service_role', 'txiki.set_note(text,text,text)', 'execute'), 'service set_note';
   assert not has_function_privilege('authenticated', 'txiki.link_stats(text,text,text)', 'execute'),
     'authenticated link_stats';
   assert has_schema_privilege('anon', 'txiki', 'usage') and has_schema_privilege('service_role', 'txiki', 'usage'),
