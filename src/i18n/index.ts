@@ -49,7 +49,10 @@ export function t(key: MessageKey, params?: Record<string, string | number>): st
   )
 }
 
-export function tCount(base: 'answerTimes' | 'answerPeople', n: number): string {
+export function tCount(
+  base: 'answerTimes' | 'answerPeople' | 'mapInCountries' | 'mapInPlaces',
+  n: number,
+): string {
   const category = new Intl.PluralRules(current).select(n) === 'one' ? 'one' : 'other'
   return t(`${base}_${category}`, { n: new Intl.NumberFormat(current).format(n) })
 }

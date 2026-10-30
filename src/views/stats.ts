@@ -16,6 +16,7 @@ import { shortLink, statsLink } from '@/route'
 import { loadLinks, removeLink, saveLink } from '@/storage'
 import { displayTarget } from '@/url'
 import { copyButton, fallbackInput } from './copy'
+import { osmLink, worldMap, type WorldMap } from './map'
 import type { View, ViewDeps } from './types'
 
 const DAYS = 14
@@ -32,20 +33,6 @@ const DEVICE_PHRASE: Record<string, MessageKey> = {
   mobile: 'devicePhraseMobile',
   tablet: 'devicePhraseTablet',
   desktop: 'devicePhraseDesktop',
-}
-
-function osmLink(lat: number, lon: number, text: string): HTMLAnchorElement {
-  const la = lat.toFixed(2)
-  const lo = lon.toFixed(2)
-  return h(
-    'a',
-    {
-      href: `https://www.openstreetmap.org/?mlat=${la}&mlon=${lo}#map=13/${la}/${lo}`,
-      target: '_blank',
-      rel: 'noopener noreferrer',
-    },
-    text,
-  )
 }
 
 function deviceLabel(device: string): string {
@@ -78,6 +65,7 @@ export function statsView(
   let deleting = false
   let focused = false
   let deleteFailed = false
+  let mapView: WorldMap | null = null
   const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
 
   async function load(): Promise<void> {
@@ -231,7 +219,25 @@ export function statsView(
         locale: getLocale(),
       }),
     )
-    return [days, hours, where, withWhat, web]
+    return [days, hours, where, ...mapBlock(stats), withWhat, web]
+  }
+
+  function mapBlock(stats: Stats): HTMLElement[] {
+    if (!stats.points.length && !stats.countries.some((c) => c.key && c.key !== OTHER_KEY))
+      return []
+    const slot = block('', t('mapTitle'), null)
+    void import('../world-data').then(({ WORLD }) => {
+      if (disposed || !slot.isConnected) return
+      const drawn = worldMap(stats, WORLD, deps.now())
+      if (!drawn) {
+        slot.remove()
+        return
+      }
+      mapView?.dispose()
+      mapView = drawn
+      slot.append(drawn.el)
+    })
+    return [slot]
   }
 
   function feed(stats: Stats): HTMLElement[] {
@@ -419,6 +425,7 @@ export function statsView(
     },
     dispose() {
       disposed = true
+      mapView?.dispose()
     },
   }
 }

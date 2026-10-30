@@ -150,6 +150,7 @@ describe('stats view', () => {
       'Por día',
       'A qué hora',
       'Desde dónde',
+      'Mapa',
       'Con qué',
       'Desde qué web',
       'Últimos clics',
@@ -162,9 +163,9 @@ describe('stats view', () => {
     const blocks = [...h.root.querySelectorAll('.blk')]
     const names = (i: number) => [...blocks[i]!.querySelectorAll('.name')].map((e) => e.textContent)
     expect(names(2)).toEqual(['España', 'Francia', 'Desconocido'])
-    expect(names(3)).toEqual(['Safari', 'Chrome', 'Otros'])
-    expect(names(4)).toEqual(['Directo', 'linkedin.com'])
-    expect(blocks[3]!.textContent).toContain('Dispositivos: Móvil 8 · Ordenador 4')
+    expect(names(4)).toEqual(['Safari', 'Chrome', 'Otros'])
+    expect(names(5)).toEqual(['Directo', 'linkedin.com'])
+    expect(blocks[4]!.textContent).toContain('Dispositivos: Móvil 8 · Ordenador 4')
   })
 
   it('lists the latest clicks with a map link only where a location was shared', async () => {
@@ -321,7 +322,7 @@ describe('stats view details', () => {
     await settle()
     const text = h.root.textContent!
     expect(
-      [...h.root.querySelectorAll('.blk')[3]!.querySelectorAll('.name')].map((e) => e.textContent),
+      [...h.root.querySelectorAll('.blk')[4]!.querySelectorAll('.name')].map((e) => e.textContent),
     ).toEqual(['Otro', 'Safari'])
     expect(text).toContain('Sistemas: Otro 4')
     expect(text).toContain('Idiomas: español de España 3 · Desconocido 1')
@@ -477,5 +478,146 @@ describe('links view behaviour', () => {
     expect(after[1]).toBe(before[1])
     expect(document.activeElement).toBe(before[1])
     expect(after[1]!.querySelector('.n')!.textContent).toContain('5')
+  })
+
+  describe('map', () => {
+    const titles = () =>
+      [...h.root.querySelectorAll('.blk h2')].map((e) => e.firstChild!.textContent)
+
+    it('is absent when there is nothing to draw', async () => {
+      const stats = emptyStats({
+        total: 3,
+        uniques: 2,
+        lastAt: hoursAgo(1),
+        countries: [{ key: null, count: 3 }],
+      })
+      h = mount({ hash: HASH, api: serving(stats) })
+      await settle()
+      expect(titles()).not.toContain('Mapa')
+      expect(h.root.querySelector('.map')).toBeNull()
+    })
+
+    it('is dropped when no country is on the map and there are no points', async () => {
+      const stats = emptyStats({
+        total: 3,
+        uniques: 2,
+        lastAt: hoursAgo(1),
+        countries: [{ key: 'XX', count: 3 }],
+      })
+      h = mount({ hash: HASH, api: serving(stats) })
+      await settle()
+      expect(titles()).not.toContain('Mapa')
+    })
+
+    it('shows countries alone with a legend and no toggle', async () => {
+      const stats = emptyStats({
+        total: 12,
+        uniques: 9,
+        lastAt: hoursAgo(1),
+        countries: [
+          { key: 'ES', count: 8 },
+          { key: 'FR', count: 2 },
+          { key: '__other__', count: 2 },
+        ],
+      })
+      h = mount({ hash: HASH, api: serving(stats) })
+      await settle()
+      expect(titles()).toEqual([
+        'Por día',
+        'A qué hora',
+        'Desde dónde',
+        'Mapa',
+        'Con qué',
+        'Desde qué web',
+        'Últimos clics',
+      ])
+      const svg = $(h.root, '.map svg')
+      expect(svg.getAttribute('aria-label')).toBe('Clics en 2 países')
+      expect(svg.querySelectorAll('path.t4')).toHaveLength(1)
+      expect(svg.querySelectorAll('path.t1')).toHaveLength(1)
+      expect(h.root.querySelector('.map-pt')).toBeNull()
+      expect(h.root.querySelector('.map-foot button')).toBeNull()
+      expect($(h.root, '.map-legend').textContent).toContain('Ninguno')
+      expect($(h.root, '.map-legend').textContent).toContain('1–2')
+    })
+
+    function withPoints(): Stats {
+      const stats = busy()
+      const at = (n: number) => hoursAgo(n)
+      stats.points = [
+        { lat: 40.4168, lon: -3.7038, at: at(2) },
+        { lat: 40.4201, lon: -3.7001, at: at(30) },
+        { lat: 40.4168, lon: -3.7038, at: at(40) },
+        { lat: 41.3851, lon: 2.1734, at: at(50) },
+        { lat: 19.4326, lon: -99.1332, at: at(60) },
+      ]
+      return stats
+    }
+
+    it('groups points sharing coordinates and summarises them for assistive tech', async () => {
+      h = mount({ hash: HASH, api: serving(withPoints()) })
+      await settle()
+      expect($(h.root, '.map svg').getAttribute('role')).toBe('img')
+      expect($(h.root, '.map svg').getAttribute('aria-label')).toBe(
+        'Clics en 2 países y en 3 ubicaciones',
+      )
+      const dots = [...h.root.querySelectorAll<HTMLButtonElement>('.map-pt')]
+      expect(dots).toHaveLength(3)
+      expect(dots.map((d) => d.textContent)).toContain('3')
+      expect(h.root.querySelector('.map svg button')).toBeNull()
+      expect(dots.every((d) => d.closest('[role="img"]') === null)).toBe(true)
+      expect($(h.root, '.map-foot button').textContent).toBe('Ver el mundo')
+    })
+
+    it('toggles between the points and the world', async () => {
+      h = mount({ hash: HASH, api: serving(withPoints()) })
+      await settle()
+      const svg = $(h.root, '.map svg')
+      const fitted = svg.getAttribute('viewBox')
+      const toggle = $<HTMLButtonElement>(h.root, '.map-foot button')
+      toggle.click()
+      expect(svg.getAttribute('viewBox')).toBe('-180 -84 360 144')
+      expect(toggle.textContent).toBe('Ver los puntos')
+      toggle.click()
+      expect(svg.getAttribute('viewBox')).toBe(fitted)
+    })
+
+    it('opens a popover with the time and an OpenStreetMap link, closes on Escape', async () => {
+      h = mount({ hash: HASH, api: serving(withPoints()) })
+      await settle()
+      const dot = [...h.root.querySelectorAll<HTMLButtonElement>('.map-pt')].find(
+        (d) => d.textContent === '3',
+      )!
+      dot.click()
+      const pop = $(h.root, '.map-pop')
+      expect(pop.hidden).toBe(false)
+      expect(dot.getAttribute('aria-expanded')).toBe('true')
+      expect(pop.textContent).toContain('3 clics en esta ubicación')
+      const link = $<HTMLAnchorElement>(pop, 'a')
+      expect(link.textContent).toBe('Abrir en OpenStreetMap')
+      expect(link.href).toBe(
+        'https://www.openstreetmap.org/?mlat=40.42&mlon=-3.70#map=13/40.42/-3.70',
+      )
+      expect(link.target).toBe('_blank')
+      expect(link.rel).toBe('noopener noreferrer')
+      expect(document.activeElement).toBe(link)
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+      expect(pop.hidden).toBe(true)
+      expect(dot.getAttribute('aria-expanded')).toBe('false')
+      expect(document.activeElement).toBe(dot)
+    })
+
+    it('shows only the time for a single click and closes when clicking outside', async () => {
+      h = mount({ hash: HASH, api: serving(withPoints()) })
+      await settle()
+      const dot = [...h.root.querySelectorAll<HTMLButtonElement>('.map-pt')].find(
+        (d) => d.textContent === '',
+      )!
+      dot.click()
+      const pop = $(h.root, '.map-pop')
+      expect(pop.textContent).toContain('Ubicación compartida,')
+      document.body.dispatchEvent(new Event('pointerdown', { bubbles: true }))
+      expect(pop.hidden).toBe(true)
+    })
   })
 })
