@@ -35,6 +35,18 @@ export const en: Record<MessageKey, string> = {
   urlPlaceholder: 'https://…',
   askLocationLabel: 'Ask for exact location',
   askLocationHint: 'Before redirecting, whoever opens the link will be asked. They can say no.',
+  noteLabel: 'Note (only you see it)',
+  noteHint: 'To remember where you shared it, e.g. “CV · Company X”. It is encrypted.',
+  noteTooLong: 'The note can be up to {max} characters.',
+  noteCreateFailed: 'The note could not be saved; you can add it from the dashboard.',
+  noteOnCard: 'Note: {note}',
+  noteAdd: 'Add note',
+  noteEdit: 'Edit',
+  noteUnreadable: 'Unreadable note',
+  noteSave: 'Save',
+  noteCancel: 'Cancel',
+  noteSaving: 'Saving…',
+  noteSaveError: 'The note could not be saved. Try again.',
   createButton: 'Shorten',
   creating: 'Shortening…',
   readyTitle: 'Your link is ready',
@@ -201,6 +213,8 @@ export const en: Record<MessageKey, string> = {
     'A pseudonymous hash of your IP for 2 days, to limit how many links you can create per hour.',
   privacyCreateLocal:
     'This browser keeps your links and their keys in localStorage to show them in “My links”. They stay on your device.',
+  privacyCreateNote:
+    'The optional note is encrypted in your browser with the link’s key: the server stores it unreadable and cannot read it.',
   privacyBasisTitle: 'Legal basis',
   privacyBasis:
     'The aggregate stats of a link rest on the legitimate interest of whoever shares it: any link shortener does this, and the data is minimal. The location rests on your consent: you can refuse it and the link still opens.',

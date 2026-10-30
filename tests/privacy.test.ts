@@ -28,7 +28,7 @@ describe('privacy page', () => {
       const headings = [...page.querySelectorAll('h2')].map((el) => el.textContent)
       expect(headings).toEqual(SECTIONS.map((key) => tables[locale][key]))
       expect(page.textContent).toContain('2026-10-30')
-      expect(page.querySelectorAll('li')).toHaveLength(6 + 3 + 3)
+      expect(page.querySelectorAll('li')).toHaveLength(6 + 4 + 3)
       expect(page.textContent).not.toMatch(/\{\w+\}/)
     })
   }

@@ -8,6 +8,7 @@ import { displayTarget } from '@/url'
 import { copyButton, fallbackInput } from '../copy'
 import { charts, type MapHost } from './blocks'
 import { feed } from './feed'
+import { noteRow, type NoteHost } from './note'
 
 export interface DashboardContext {
   code: string
@@ -18,6 +19,7 @@ export interface DashboardContext {
   deleteFailed: boolean
   onRemove: () => void
   map: MapHost
+  note: NoteHost
 }
 
 export function dashboard(stats: Stats, ctx: DashboardContext): HTMLElement {
@@ -73,6 +75,7 @@ export function dashboard(stats: Stats, ctx: DashboardContext): HTMLElement {
           { class: 'to' },
           `→ ${displayTarget(stats.target)} · ${t('statsCreated', { date: shortDate(stats.createdAt) })}`,
         ),
+        noteRow(ctx.note),
       ),
       h(
         'div',

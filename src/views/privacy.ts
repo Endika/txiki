@@ -53,7 +53,12 @@ export function privacyView(container: HTMLElement): View {
           section('privacyNotTitle', h('p', {}, t('privacyNot'))),
           section(
             'privacyCreateTitle',
-            list(['privacyCreateTarget', 'privacyCreateRate', 'privacyCreateLocal']),
+            list([
+              'privacyCreateTarget',
+              'privacyCreateRate',
+              'privacyCreateNote',
+              'privacyCreateLocal',
+            ]),
           ),
           section('privacyBasisTitle', h('p', {}, t('privacyBasis'))),
           section(

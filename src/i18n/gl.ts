@@ -36,6 +36,18 @@ export const gl: Record<MessageKey, string> = {
   urlPlaceholder: 'https://…',
   askLocationLabel: 'Pedir ubicación exacta',
   askLocationHint: 'Antes de redirixir, preguntarase a quen a abra. Pode dicir que non.',
+  noteLabel: 'Nota (só a ves ti)',
+  noteHint: 'Para lembrar onde o compartiches, p. ex. «CV · Empresa X». Vai cifrada.',
+  noteTooLong: 'A nota admite ata {max} caracteres.',
+  noteCreateFailed: 'Non se puido gardar a nota; podes engadila desde o panel.',
+  noteOnCard: 'Nota: {note}',
+  noteAdd: 'Engadir nota',
+  noteEdit: 'Editar',
+  noteUnreadable: 'Nota ilexible',
+  noteSave: 'Gardar',
+  noteCancel: 'Cancelar',
+  noteSaving: 'Gardando…',
+  noteSaveError: 'Non se puido gardar a nota. Téntao de novo.',
   createButton: 'Acurtar',
   creating: 'Acurtando…',
   readyTitle: 'A túa ligazón está lista',
@@ -200,6 +212,8 @@ export const gl: Record<MessageKey, string> = {
     'Un hash pseudónimo da túa IP durante 2 días, para limitar os links que podes crear por hora.',
   privacyCreateLocal:
     'Este navegador garda os teus links e as súas chaves en localStorage para amosarchos en «Os meus links». Quedan no teu dispositivo.',
+  privacyCreateNote:
+    'A nota opcional cífrase no teu navegador coa chave do link: o servidor gárdaa ilexible e non a pode ler.',
   privacyBasisTitle: 'Base legal',
   privacyBasis:
     'As estatísticas agregadas dun link baséanse no interese lexítimo de quen o comparte: é o que fai calquera acurtador e os datos son mínimos. A ubicación baséase no teu consentimento: podes rexeitala e o link ábrese igual.',
