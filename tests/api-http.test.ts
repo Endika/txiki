@@ -199,6 +199,39 @@ describe('click', () => {
   })
 })
 
+describe('setNote', () => {
+  it('calls set_note with the note and returns the result', async () => {
+    const { api, fetchFn } = setup(reply(200, true))
+    await expect(api.setNote(CODE, TOKEN, 'blob')).resolves.toBe(true)
+    const [url, init] = fetchFn.mock.calls[0]!
+    expect(url).toBe(`${URL_}/rest/v1/rpc/set_note`)
+    expect(new Headers(init?.headers).get('apikey')).toBe(KEY)
+    expect(JSON.parse(init?.body as string)).toEqual({
+      p_code: CODE,
+      p_token: TOKEN,
+      p_note: 'blob',
+    })
+  })
+
+  it('sends null to clear and returns false for a wrong token', async () => {
+    const { api, fetchFn } = setup(reply(200, false))
+    await expect(api.setNote(CODE, TOKEN, null)).resolves.toBe(false)
+    expect(JSON.parse(fetchFn.mock.calls[0]![1]?.body as string).p_note).toBeNull()
+  })
+
+  it('maps failures like remove', async () => {
+    await expect(
+      setup(reply(503, { message: 'x' })).api.setNote(CODE, TOKEN, 'a'),
+    ).rejects.toBeInstanceOf(NetworkError)
+    await expect(
+      setup(reply(400, { message: 'x' })).api.setNote(CODE, TOKEN, 'a'),
+    ).rejects.toBeInstanceOf(RequestError)
+    await expect(setup(reply(200, 'x')).api.setNote(CODE, TOKEN, 'a')).rejects.toBeInstanceOf(
+      NetworkError,
+    )
+  })
+})
+
 describe('rpc calls', () => {
   it('sends the profile and key headers', async () => {
     const { api, fetchFn } = setup(reply(200, true))
@@ -255,6 +288,13 @@ describe('rpc calls', () => {
 })
 
 describe('parseStats', () => {
+  it('reads note, null and absent', () => {
+    expect(parseStats({ ...rawStats(), note: 'abc' }).note).toBe('abc')
+    expect(parseStats({ ...rawStats(), note: null }).note).toBeNull()
+    expect(parseStats(rawStats()).note).toBeNull()
+    expect(() => parseStats({ ...rawStats(), note: 5 })).toThrow()
+  })
+
   it('reads bots and defaults to 0 when the field is missing', () => {
     expect(parseStats({ ...rawStats(), bots: 4 }).bots).toBe(4)
     expect(parseStats(rawStats()).bots).toBe(0)

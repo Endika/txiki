@@ -2,6 +2,7 @@ import { referrerHost } from '../supabase/functions/_shared/request.ts'
 import {
   CaptchaError,
   InvalidUrlError,
+  RequestError,
   type ClickResult,
   type Stats,
   type TxikiApi,
@@ -15,6 +16,7 @@ export type FakeLink = {
   target: string
   askLocation: boolean
   createdAt: string
+  note: string | null
   clicks: FakeClick[]
   points: { lat: number; lon: number; at: string }[]
 }
@@ -88,6 +90,7 @@ export function createFakeApi(options: { now?: () => number } = {}): FakeApi {
         target: new URL(url.trim()).href,
         askLocation,
         createdAt: new Date(now()).toISOString(),
+        note: null,
         clicks: [],
         points: [],
       })
@@ -142,6 +145,7 @@ export function createFakeApi(options: { now?: () => number } = {}): FakeApi {
         disabled: false,
         total: clicks.length,
         bots: link.clicks.length - clicks.length,
+        note: link.note,
         uniques: clicks.length,
         firstAt: clicks[0]?.at ?? null,
         lastAt: clicks.at(-1)?.at ?? null,
@@ -171,6 +175,16 @@ export function createFakeApi(options: { now?: () => number } = {}): FakeApi {
       takeFailure()
       if (!owned(code, token)) return false
       links.delete(code)
+      return true
+    },
+    async setNote(code, token, note) {
+      takeFailure()
+      const link = owned(code, token)
+      if (!link) return false
+      if (note !== null && note !== '' && !/^[A-Za-z0-9_-]{22,600}$/.test(note)) {
+        throw new RequestError(400)
+      }
+      link.note = note || null
       return true
     },
   }

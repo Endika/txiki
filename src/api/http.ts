@@ -62,6 +62,7 @@ export function parseStats(raw: unknown): Stats {
     total: num(r.total),
     uniques: num(r.uniques),
     bots: r.bots === undefined ? 0 : num(r.bots),
+    note: r.note === undefined ? null : strOrNull(r.note),
     firstAt: strOrNull(r.first_at),
     lastAt: strOrNull(r.last_at),
     byDay: list(r.by_day).map((e) => {
@@ -211,6 +212,11 @@ export function createHttpApi(
     },
     async remove(code, token) {
       const data = await rpc('delete_link', { p_code: code, p_token: token })
+      if (typeof data !== 'boolean') throw new NetworkError()
+      return data
+    },
+    async setNote(code, token, note) {
+      const data = await rpc('set_note', { p_code: code, p_token: token, p_note: note })
       if (typeof data !== 'boolean') throw new NetworkError()
       return data
     },
