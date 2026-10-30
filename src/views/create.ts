@@ -8,7 +8,7 @@ import {
 } from '@/api'
 import { h, icon } from '@/dom'
 import { t, type MessageKey } from '@/i18n'
-import { shortLink, statsLink } from '@/route'
+import { shortLink, statsHash, statsLink } from '@/route'
 import { saveLink } from '@/storage'
 import type { TurnstileHandle } from '@/turnstile'
 import { displayUrl, normalizeUrl } from '@/url'
@@ -104,7 +104,7 @@ export function createView(container: HTMLElement, deps: ViewDeps): View {
       result = {
         link: shortLink(created.code, base),
         stats: statsLink(created.code, created.token, base),
-        hash: `#s/${created.code}.${created.token}`,
+        hash: statsHash(created.code, created.token),
         saved,
       }
       animate = true

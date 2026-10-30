@@ -1,6 +1,7 @@
 import { h } from '@/dom'
 import { formatNumber, isRecent, relativeTime } from '@/format'
 import { t } from '@/i18n'
+import { statsHash } from '@/route'
 import { loadLinks, type SavedLink } from '@/storage'
 import { displayTarget } from '@/url'
 import type { View, ViewDeps } from './types'
@@ -66,7 +67,7 @@ export function linksView(container: HTMLElement, deps: ViewDeps): View {
     const when = h('span', { class: 'when' })
     const a = h(
       'a',
-      { class: 'li', href: `#s/${link.code}.${link.token}` },
+      { class: 'li', href: statsHash(link.code, link.token) },
       h('span', { class: 'code' }, link.code),
       n,
       h('span', { class: 'host' }, link.target ? displayTarget(link.target) : ''),
