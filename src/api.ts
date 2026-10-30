@@ -56,6 +56,13 @@ export class NetworkError extends Error {
   }
 }
 
+export class InvalidTargetError extends NetworkError {
+  constructor(options?: ErrorOptions) {
+    super(options)
+    this.name = 'InvalidTargetError'
+  }
+}
+
 export class RequestError extends Error {
   readonly status: number
   constructor(status: number) {
@@ -272,7 +279,7 @@ export function createHttpApi(
         const protocol = new URL(d.target).protocol
         if (protocol !== 'http:' && protocol !== 'https:') throw new Error('protocol')
       } catch (cause) {
-        throw new NetworkError({ cause })
+        throw new InvalidTargetError({ cause })
       }
       return { target: d.target, askLocation: d.askLocation, locationToken: d.locationToken }
     },
