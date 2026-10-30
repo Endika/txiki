@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.0](https://github.com/Endika/txiki/compare/v0.11.0...v0.12.0) (2026-10-30)
+
+
+### Features
+
+* **click:** pass model, screen class and channel to record_click ([2db8c40](https://github.com/Endika/txiki/commit/2db8c409ed15ed5cfd956f4ec49e807db990f5fa))
+
 ## [0.11.0](https://github.com/Endika/txiki/compare/v0.10.0...v0.11.0) (2026-10-30)
 
 
