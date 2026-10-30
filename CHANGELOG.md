@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.1](https://github.com/Endika/txiki/compare/v0.14.0...v0.14.1) (2026-10-30)
+
+
+### Bug Fixes
+
+* **deploy:** upload every shared module the functions import ([c802a1c](https://github.com/Endika/txiki/commit/c802a1c72a067f0c6f811ce62da4cba0e8fe4fae))
+
 ## [0.14.0](https://github.com/Endika/txiki/compare/v0.13.0...v0.14.0) (2026-10-30)
 
 
