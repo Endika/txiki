@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { parseRoute, shortLink, statsLink } from '@/route'
+import { parseRoute, shortLink, statsHash, statsLink } from '@/route'
 
 const TOKEN = 'A'.repeat(43)
 
@@ -62,5 +62,12 @@ describe('link builders', () => {
   it('round-trips through parseRoute', () => {
     const hash = new URL(statsLink('Ab3dE9x', TOKEN, base)).hash
     expect(parseRoute(hash)).toEqual({ kind: 'stats', code: 'Ab3dE9x', token: TOKEN })
+  })
+  it('round-trips statsHash through parseRoute', () => {
+    expect(parseRoute(statsHash('Ab3dE9x', TOKEN))).toEqual({
+      kind: 'stats',
+      code: 'Ab3dE9x',
+      token: TOKEN,
+    })
   })
 })

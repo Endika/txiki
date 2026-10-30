@@ -23,6 +23,10 @@ export function shortLink(code: string, base: string): string {
   return `${base}#${code}`
 }
 
+export function statsHash(code: string, token: string): string {
+  return `#s/${code}.${token}`
+}
+
 export function statsLink(code: string, token: string, base: string): string {
-  return `${base}#s/${code}.${token}`
+  return `${base}${statsHash(code, token)}`
 }
