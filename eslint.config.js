@@ -11,6 +11,7 @@ export default tseslint.config(
       'node_modules',
       'scripts/*.mjs',
       'supabase/functions/_shared/geo-data.ts',
+      'src/world-data.ts',
     ],
   },
   {
