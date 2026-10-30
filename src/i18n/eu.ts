@@ -159,6 +159,25 @@ export const eu: Record<MessageKey, string> = {
   other: 'Besteak',
   direct: 'Zuzenean',
   unknown: 'Ezezaguna',
+  blockChannels: 'Kanalak',
+  channelDirect: 'Zuzenean (kanalik gabe)',
+  blockNetworks: 'Sareak',
+  unknownF: 'Ezezaguna',
+  blockCities: 'Hiriak',
+  noteSpainOnly: 'Espainia soilik',
+  cityElsewhere: 'Espainiatik kanpo edo ezezaguna',
+  blockModels: 'Modeloak',
+  noteAndroidChrome: 'Android eta Chrome soilik',
+  blockScreens: 'Pantailak',
+  screenSmallPhone: 'Telefono txikia',
+  screenPhone: 'Telefonoa',
+  screenTablet: 'Tableta',
+  screenLaptop: 'Eramangarria',
+  screenLarge: 'Pantaila handia',
+  channelTitle: 'Kanaldun esteka',
+  channelLabel: 'Kanala',
+  channelPlaceholder: 'instagram',
+  channelHint: 'Esteka bera, etiketa desberdina: panelak bisitak kanalka banatzen ditu.',
   withDevices: 'Gailuak',
   withSystems: 'Sistemak',
   withLangs: 'Hizkuntzak',
@@ -206,6 +225,13 @@ export const eu: Record<MessageKey, string> = {
     'Bisitari-identifikatzaile ezizendatu bat, pertsona desberdinak zenbatzeko. Eguneko gatz batekin kalkulatzen da, eta gatza hurrengo egunean ezabatzen da: harrezkero inork ezin du berriz kalkulatu.',
   privacyClickLocation:
     'Gutxi gorabeherako kokapena, kilometro bateko marjinarekin, estekak eskatzen badu eta irekitzen duenak partekatzea onartzen badu soilik.',
+  privacyClickNetwork:
+    'Sarea edo erakundea (adibidez, operadore bat edo enpresa bat) eta, Espainian soilik, hiria. Zerbitzarian kalkulatzen dira IPtik abiatuta, eta IPa une horretan bertan baztertzen da.',
+  privacyClickModel:
+    'Gailuaren modeloa, nabigatzaileak jakinarazten badu soilik (Chrome Android-en).',
+  privacyClickScreen:
+    'Pantailaren tamaina maila gisa («telefonoa», «tableta», «eramangarria»…), ez neurri zehatzak.',
+  privacyClickChannel: 'Kanala, irekitako estekak etiketa bat badu (adibidez, «instagram»).',
   privacyNotTitle: 'Zer ez den gordetzen',
   privacyNot:
     'Ez dira gordetzen IPa eta user-agent osoa. Ez dago cookierik, analitikarik edo konturik.',
@@ -234,6 +260,6 @@ export const eu: Record<MessageKey, string> = {
   privacyRightsTitle: 'Zure eskubideak eta nola ezabatu',
   privacyRights:
     'Esteka bat sortu duenak ezaba dezake, bere klik guztiekin, estatistiketatik «{delete}» sakatuta. Klik egin duena ezin du zerbitzuak identifikatu, ez baita klika pertsona batekin lotzen duen daturik gordetzen; horregatik ezin ditugu «haren» klikak bilatu edo ezabatu. Gainerako guztirako, ireki issue bat.',
-  privacyAttr: 'IP-herrialde datuak: {link}, CC BY 4.0 lizentziapean.',
+  privacyAttr: 'IP-herrialde, sare eta hiri datuak: {link}, CC BY 4.0 lizentziapean.',
   privacyFull: 'Irakurri jakinarazpen osoa',
 }

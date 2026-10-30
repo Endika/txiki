@@ -156,6 +156,24 @@ describe('click', () => {
     expect(JSON.parse(init?.body as string)).toEqual({ code: CODE, ...ctx })
   })
 
+  it('sends channel, screen and model only when present', async () => {
+    const { api, fetchFn } = setup(
+      reply(200, { target: 'https://example.com/', askLocation: false, locationToken: null }),
+    )
+    const base = { lang: 'es', tz: 'UTC', referrer: '', bot: false }
+    await api.click(CODE, { ...base, channel: 'tv', screen: { w: 390, h: 844 }, model: 'Pixel 8' })
+    await api.click(CODE, { ...base, channel: null, model: null })
+    const bodies = fetchFn.mock.calls.map((c) => JSON.parse(c[1]?.body as string))
+    expect(bodies[0]).toEqual({
+      code: CODE,
+      ...base,
+      channel: 'tv',
+      screen: { w: 390, h: 844 },
+      model: 'Pixel 8',
+    })
+    expect(bodies[1]).toEqual({ code: CODE, ...base })
+  })
+
   it('returns null on 404', async () => {
     const { api } = setup(reply(404, { error: 'not_found' }))
     await expect(
@@ -293,6 +311,54 @@ describe('parseStats', () => {
     expect(parseStats({ ...rawStats(), note: null }).note).toBeNull()
     expect(parseStats(rawStats()).note).toBeNull()
     expect(() => parseStats({ ...rawStats(), note: 5 })).toThrow()
+  })
+
+  it('defaults the new dimensions for an old server', () => {
+    const s = parseStats(rawStats())
+    expect([s.networks, s.cities, s.models, s.screens, s.channels]).toEqual([[], [], [], [], []])
+    expect(s.recent[0]).toMatchObject({ network: null, city: null, channel: null })
+  })
+
+  it('reads the new dimensions, including null keys', () => {
+    const raw = {
+      ...rawStats(),
+      networks: [
+        { key: 'Movistar', count: 2 },
+        { key: null, count: 1 },
+      ],
+      cities: [{ key: 'Bilbao, Bizkaia', count: 1 }],
+      models: [{ key: 'Pixel 8', count: 1 }],
+      screens: [{ key: 'phone', count: 3 }],
+      channels: [
+        { key: 'instagram', count: 2 },
+        { key: null, count: 1 },
+      ],
+      recent: [
+        {
+          ...rawStats().recent[0],
+          network: 'Movistar',
+          city: 'Bilbao, Bizkaia',
+          channel: 'instagram',
+        },
+      ],
+    }
+    const s = parseStats(raw)
+    expect(s.networks[1]).toEqual({ key: null, count: 1 })
+    expect(s.cities).toEqual([{ key: 'Bilbao, Bizkaia', count: 1 }])
+    expect(s.channels[0]).toEqual({ key: 'instagram', count: 2 })
+    expect(s.recent[0]).toMatchObject({
+      network: 'Movistar',
+      city: 'Bilbao, Bizkaia',
+      channel: 'instagram',
+    })
+  })
+
+  it('rejects wrongly typed new dimensions', () => {
+    expect(() => parseStats({ ...rawStats(), networks: 'x' })).toThrow()
+    expect(() => parseStats({ ...rawStats(), channels: [{ key: 1, count: 1 }] })).toThrow()
+    expect(() =>
+      parseStats({ ...rawStats(), recent: [{ ...rawStats().recent[0], city: 5 }] }),
+    ).toThrow()
   })
 
   it('reads bots and defaults to 0 when the field is missing', () => {

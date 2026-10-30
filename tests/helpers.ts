@@ -44,6 +44,8 @@ export type Options = {
   client?: Partial<ClientContext>
   languages?: readonly string[]
   locale?: string | null
+  deviceModel?: () => Promise<string | null>
+  screenSize?: { w: number; h: number }
 }
 
 export function newFake(): FakeApi {
@@ -90,6 +92,8 @@ export function mount(options: Options = {}): Harness {
     redirect,
     confirm,
     now: () => NOW,
+    deviceModel: options.deviceModel ?? (() => Promise.resolve(null)),
+    screenSize: () => options.screenSize ?? { w: 390, h: 844 },
     isFramed: () => options.framed ?? false,
     client: { ...CLIENT, ...options.client },
     languages: options.languages ?? ['en-US'],
@@ -132,6 +136,11 @@ export function emptyStats(overrides: Partial<Stats> = {}): Stats {
     devices: [],
     referrers: [],
     langs: [],
+    networks: [],
+    cities: [],
+    models: [],
+    screens: [],
+    channels: [],
     recent: [],
     points: [],
     ...overrides,

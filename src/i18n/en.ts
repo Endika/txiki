@@ -156,6 +156,25 @@ export const en: Record<MessageKey, string> = {
   other: 'Others',
   direct: 'Direct',
   unknown: 'Unknown',
+  blockChannels: 'Channels',
+  channelDirect: 'Direct (no channel)',
+  blockNetworks: 'Networks',
+  unknownF: 'Unknown',
+  blockCities: 'Cities',
+  noteSpainOnly: 'Spain only',
+  cityElsewhere: 'Outside Spain or unknown',
+  blockModels: 'Models',
+  noteAndroidChrome: 'Android with Chrome only',
+  blockScreens: 'Screens',
+  screenSmallPhone: 'Small phone',
+  screenPhone: 'Phone',
+  screenTablet: 'Tablet',
+  screenLaptop: 'Laptop',
+  screenLarge: 'Large screen',
+  channelTitle: 'Link with a channel',
+  channelLabel: 'Channel',
+  channelPlaceholder: 'instagram',
+  channelHint: 'Same link, different label: the dashboard splits visits by channel.',
   withDevices: 'Devices',
   withSystems: 'Systems',
   withLangs: 'Languages',
@@ -203,6 +222,13 @@ export const en: Record<MessageKey, string> = {
     'A pseudonymous visitor ID, to count distinct people. It is computed with a daily salt that is deleted the next day, after which nobody can compute it again.',
   privacyClickLocation:
     'An approximate location, within about a kilometre, only if the link asks for it and the person opening it agrees to share it.',
+  privacyClickNetwork:
+    'The network or organisation (for example, a carrier or a company) and, in Spain only, the city. Both are worked out from the IP address on the server, and the IP is discarded right then.',
+  privacyClickModel: 'The device model, only if the browser reports it (Chrome on Android).',
+  privacyClickScreen:
+    'The screen size as a class (“phone”, “tablet”, “laptop”…), not the exact dimensions.',
+  privacyClickChannel:
+    'The channel, if the link that was opened carries a tag (for example, “instagram”).',
   privacyNotTitle: 'What is not stored',
   privacyNot:
     'The IP address and the full user agent are not stored. There are no cookies, no analytics and no accounts.',
@@ -231,6 +257,6 @@ export const en: Record<MessageKey, string> = {
   privacyRightsTitle: 'Your rights and how to delete',
   privacyRights:
     'Whoever created a link can delete it, with all its clicks, from its stats with “{delete}”. Whoever clicked cannot be identified by the service, because nothing is stored that ties a click to a person; for the same reason we cannot look up or delete “their” clicks. For anything else, open an issue.',
-  privacyAttr: 'IP to country data by {link}, under a CC BY 4.0 licence.',
+  privacyAttr: 'IP to country, network and city data by {link}, under a CC BY 4.0 licence.',
   privacyFull: 'Read the full notice',
 }

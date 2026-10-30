@@ -4,7 +4,7 @@ import { localDay } from '@/format'
 import { icon } from '@/dom'
 import { t } from '@/i18n'
 import { loadLinks, saveLink } from '@/storage'
-import { $, NOW, emptyStats, mount, newFake, settle, type Harness } from './helpers'
+import { $, NOW, emptyStats, mount, newFake, settle, type, type Harness } from './helpers'
 
 let h: Harness
 
@@ -62,7 +62,17 @@ function busy(): Stats {
     ],
     langs: [{ key: 'es-ES', count: 12 }],
     recent: [
-      { at, country: 'ES', browser: 'Safari', os: 'iOS', device: 'mobile', referrerHost: null },
+      {
+        at,
+        country: 'ES',
+        browser: 'Safari',
+        os: 'iOS',
+        device: 'mobile',
+        referrerHost: null,
+        network: null,
+        city: null,
+        channel: null,
+      },
       {
         at: hoursAgo(5),
         country: 'FR',
@@ -70,6 +80,9 @@ function busy(): Stats {
         os: 'Windows',
         device: 'desktop',
         referrerHost: 'linkedin.com',
+        network: null,
+        city: null,
+        channel: null,
       },
     ],
     points: [{ lat: 40.41678, lon: -3.70379, at }],
@@ -294,6 +307,168 @@ describe('stats view', () => {
     picker.dispatchEvent(new Event('change'))
     expect(spy).toHaveBeenCalledTimes(1)
     expect($(h.root, '.answer').textContent).toContain('It has been opened 12 times, by 9 people.')
+  })
+})
+
+describe('stats view dimensions', () => {
+  function rich(): Stats {
+    return emptyStats({
+      total: 6,
+      uniques: 5,
+      lastAt: hoursAgo(1),
+      channels: [
+        { key: 'instagram', count: 3 },
+        { key: null, count: 3 },
+      ],
+      networks: [
+        { key: 'Movistar', count: 4 },
+        { key: null, count: 2 },
+      ],
+      cities: [
+        { key: 'Bilbao, Bizkaia', count: 2 },
+        { key: null, count: 4 },
+      ],
+      models: [
+        { key: 'Pixel 8', count: 2 },
+        { key: null, count: 4 },
+      ],
+      screens: [
+        { key: 'small-phone', count: 1 },
+        { key: 'phone', count: 2 },
+        { key: 'tablet', count: 1 },
+        { key: 'laptop', count: 1 },
+        { key: 'large', count: 1 },
+        { key: null, count: 1 },
+      ],
+      recent: [
+        {
+          at: hoursAgo(1),
+          country: 'ES',
+          browser: 'Chrome',
+          os: 'Android',
+          device: 'mobile',
+          referrerHost: null,
+          network: 'Movistar',
+          city: 'Bilbao, Bizkaia',
+          channel: 'instagram',
+        },
+        {
+          at: hoursAgo(2),
+          country: 'FR',
+          browser: 'Safari',
+          os: 'iOS',
+          device: 'mobile',
+          referrerHost: null,
+          network: null,
+          city: null,
+          channel: null,
+        },
+      ],
+    })
+  }
+
+  function names(title: string): string[] {
+    const blk = [...h.root.querySelectorAll('.blk')].find(
+      (b) => b.querySelector('h2')!.firstChild!.textContent === title,
+    )!
+    return [...blk.querySelectorAll('.name')].map((e) => e.textContent!)
+  }
+
+  it('renders the new blocks with their captions and null labels', async () => {
+    h = mount({ hash: HASH, api: serving(rich()) })
+    await settle()
+    expect(names('Canales')).toEqual(['instagram', 'Directo (sin canal)'])
+    expect(names('Redes')).toEqual(['Movistar', 'Desconocida'])
+    expect(names('Ciudades')).toEqual(['Bilbao, Bizkaia', 'Fuera de España o desconocida'])
+    expect(names('Modelos')).toEqual(['Pixel 8', 'Desconocido'])
+    expect(names('Pantallas')).toEqual([
+      'Móvil pequeño',
+      'Móvil',
+      'Tablet',
+      'Portátil',
+      'Pantalla grande',
+      'Desconocida',
+    ])
+    const text = h.root.textContent!
+    expect(text).toContain('Solo España')
+    expect(text).toContain('Solo Android con Chrome')
+  })
+
+  it('puts channels before countries', async () => {
+    h = mount({ hash: HASH, api: serving(rich()) })
+    await settle()
+    const titles = [...h.root.querySelectorAll('.blk h2')].map((e) => e.firstChild!.textContent)
+    expect(titles.indexOf('Canales')).toBeLessThan(titles.indexOf('Desde dónde'))
+  })
+
+  it('hides blocks without data', async () => {
+    h = mount({ hash: HASH, api: serving(busy()) })
+    await settle()
+    const text = h.root.textContent!
+    for (const title of ['Canales', 'Redes', 'Ciudades', 'Modelos', 'Pantallas']) {
+      expect(text).not.toContain(title)
+    }
+  })
+
+  it('shows city or country, network and the channel tag in the feed', async () => {
+    h = mount({ hash: HASH, api: serving(rich()) })
+    await settle()
+    const [first, second] = [...h.root.querySelectorAll('.feed li')]
+    expect(first!.textContent).toContain('Bilbao, Bizkaia · Móvil · Chrome · Movistar')
+    expect($(first as HTMLElement, '.tag').textContent).toBe('instagram')
+    expect(second!.textContent).toContain('Francia')
+    expect(second!.querySelector('.tag')).toBeNull()
+  })
+
+  it('translates the screen classes in every language', async () => {
+    h = mount({ hash: HASH, api: serving(rich()), locale: 'en' })
+    await settle()
+    expect(names('Screens')).toContain('Small phone')
+    expect(names('Screens')).toContain('Large screen')
+  })
+})
+
+describe('channel link generator', () => {
+  async function open() {
+    const fake = newFake()
+    const { code, token } = await fake.create('https://example.com/', false, 'tok')
+    h = mount({ hash: `#s/${code}.${token}`, fake })
+    await settle()
+    return code
+  }
+
+  it('is disabled until a channel is typed', async () => {
+    await open()
+    const button = $<HTMLButtonElement>(h.root, '.chan button')
+    expect(button.disabled).toBe(true)
+    expect($<HTMLInputElement>(h.root, '.chan input').placeholder).toBe('instagram')
+    expect($(h.root, '.chan').textContent).toContain(
+      'Mismo enlace, otra etiqueta: el panel separa las visitas por canal.',
+    )
+  })
+
+  it('normalizes as you type and copies the link with the channel', async () => {
+    const code = await open()
+    const input = $<HTMLInputElement>(h.root, '.chan input')
+    type(input, 'Mi Canal_#1 ' + 'x'.repeat(30))
+    expect(input.value).toBe(('mi-canal1-' + 'x'.repeat(30)).slice(0, 24))
+    const writeText = vi.fn(async (_: string) => {})
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true })
+    const button = $<HTMLButtonElement>(h.root, '.chan button')
+    expect(button.disabled).toBe(false)
+    button.click()
+    await settle()
+    expect(writeText).toHaveBeenCalledWith(
+      `${window.location.origin}${window.location.pathname}#${code}/${input.value}`,
+    )
+  })
+
+  it('disables the button again when the input is cleared', async () => {
+    await open()
+    const input = $<HTMLInputElement>(h.root, '.chan input')
+    type(input, 'tv')
+    type(input, '')
+    expect($<HTMLButtonElement>(h.root, '.chan button').disabled).toBe(true)
   })
 })
 

@@ -13,6 +13,9 @@ function click(over: Partial<Parameters<typeof pairClicksWithPoints>[0][number]>
     os: 'iOS',
     device: 'mobile',
     referrerHost: null,
+    network: null,
+    city: null,
+    channel: null,
     ...over,
   }
 }
