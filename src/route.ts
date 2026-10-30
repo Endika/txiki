@@ -1,0 +1,28 @@
+export type Route =
+  | { kind: 'home' }
+  | { kind: 'links' }
+  | { kind: 'privacy' }
+  | { kind: 'go'; code: string }
+  | { kind: 'stats'; code: string; token: string }
+
+const GO = /^([0-9A-Za-z]{7})(?![0-9A-Za-z])/
+const STATS = /^s\/([0-9A-Za-z]{7})\.([A-Za-z0-9_-]{43})(?![A-Za-z0-9_-])/
+
+export function parseRoute(hash: string): Route {
+  const h = hash.startsWith('#') ? hash.slice(1) : hash
+  if (h === '/links') return { kind: 'links' }
+  if (h === '/privacy') return { kind: 'privacy' }
+  const stats = STATS.exec(h)
+  if (stats) return { kind: 'stats', code: stats[1]!, token: stats[2]! }
+  const go = GO.exec(h)
+  if (go) return { kind: 'go', code: go[1]! }
+  return { kind: 'home' }
+}
+
+export function shortLink(code: string, base: string): string {
+  return `${base}#${code}`
+}
+
+export function statsLink(code: string, token: string, base: string): string {
+  return `${base}#s/${code}.${token}`
+}
