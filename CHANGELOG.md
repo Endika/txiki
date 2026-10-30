@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.0](https://github.com/Endika/txiki/compare/v0.8.1...v0.9.0) (2026-10-30)
+
+
+### Features
+
+* **db:** add encrypted per-link note ([378a191](https://github.com/Endika/txiki/commit/378a19164dd03e46c63404bfebbc50ea49388a92))
+
 ## [0.8.1](https://github.com/Endika/txiki/compare/v0.8.0...v0.8.1) (2026-10-30)
 
 
