@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.7.0](https://github.com/Endika/txiki/compare/v0.6.0...v0.7.0) (2026-10-30)
+
+
+### Features
+
+* detect bot clicks in the click function ([4842fe7](https://github.com/Endika/txiki/commit/4842fe73d70ac707abd651e1316833393223baf8))
+* flag bot clicks in the database ([15c2a9a](https://github.com/Endika/txiki/commit/15c2a9a3c4c02dfe5e43b3f1c90f6e0dcfcca8f3))
+* show bot visits apart on the stats page ([c776bea](https://github.com/Endika/txiki/commit/c776beaa1e70cc5d1de4cd9b40ec83f00b0adb9f))
+
+
+### Bug Fixes
+
+* run production scripts from any directory ([b8c7c25](https://github.com/Endika/txiki/commit/b8c7c25b96d52dc03dd10d96350cf9dc50b5734c))
+
 ## [0.6.0](https://github.com/Endika/txiki/compare/v0.5.0...v0.6.0) (2026-10-30)
 
 
