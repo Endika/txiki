@@ -265,7 +265,7 @@ begin
   assert v_stats->'referrers'->0 = '{"key": "T.co", "count": 3}'::jsonb, 'referrers';
   assert jsonb_array_length(v_stats->'recent') = 4, 'recent lists the clicks';
   assert (select array_agg(k order by k) from jsonb_object_keys(v_stats->'recent'->0) k)
-    = array['at', 'browser', 'country', 'device', 'os', 'referrer_host'], 'recent has exactly these keys';
+    = array['at', 'browser', 'channel', 'city', 'country', 'device', 'network', 'os', 'referrer_host'], 'recent has exactly these keys';
 
   insert into txiki.clicks (code, browser, os, device, visitor)
   select r.code, 'Chrome', 'Linux', 'desktop', '\x03' from generate_series(1, 60);
@@ -443,7 +443,8 @@ do $$
 declare tbl text; priv text; rl text;
 begin
   foreach rl in array array['anon', 'authenticated', 'service_role'] loop
-    foreach tbl in array array['txiki.links', 'txiki.clicks', 'txiki.create_log', 'txiki.salts'] loop
+    foreach tbl in array array['txiki.links', 'txiki.clicks', 'txiki.create_log', 'txiki.salts',
+      'txiki.asn_orgs', 'txiki.asn_ranges', 'txiki.city_es_ranges'] loop
       foreach priv in array array['select', 'insert', 'update', 'delete', 'truncate', 'references', 'trigger'] loop
         assert not has_table_privilege(rl, tbl, priv), format('%s must not have %s on %s', rl, priv, tbl);
       end loop;
@@ -461,13 +462,17 @@ begin
     = array['create_link', 'record_click'], 'service_role runs exactly two functions';
   assert not has_function_privilege('anon', 'txiki.create_link(text,bool,text)', 'execute'), 'anon create_link';
   assert not has_function_privilege('anon',
-    'txiki.record_click(text,text,text,text,text,text,text,text,text,bool)', 'execute'), 'anon record_click';
+    'txiki.record_click(text,text,text,text,text,text,text,text,text,bool,text,text,text)', 'execute'), 'anon record_click';
+  assert not has_function_privilege('anon', 'txiki.network_for(inet)', 'execute'), 'anon network_for';
+  assert not has_function_privilege('anon', 'txiki.city_for(inet)', 'execute'), 'anon city_for';
+  assert not has_function_privilege('service_role', 'txiki.network_for(inet)', 'execute'), 'service network_for';
+  assert not has_function_privilege('service_role', 'txiki.city_for(inet)', 'execute'), 'service city_for';
   assert not has_function_privilege('anon', 'txiki.salt_for(date)', 'execute'), 'anon salt_for';
   assert not has_function_privilege('authenticated', 'txiki.create_link(text,bool,text)', 'execute'),
     'authenticated create_link';
   assert has_function_privilege('service_role', 'txiki.create_link(text,bool,text)', 'execute'), 'service create_link';
   assert has_function_privilege('service_role',
-    'txiki.record_click(text,text,text,text,text,text,text,text,text,bool)', 'execute'), 'service record_click';
+    'txiki.record_click(text,text,text,text,text,text,text,text,text,bool,text,text,text)', 'execute'), 'service record_click';
   assert not has_function_privilege('service_role', 'txiki.link_stats(text,text,text)', 'execute'), 'service link_stats';
   assert has_function_privilege('anon', 'txiki.link_stats(text,text,text)', 'execute'), 'anon link_stats';
   assert has_function_privilege('anon', 'txiki.delete_link(text,text)', 'execute'), 'anon delete_link';
@@ -566,6 +571,147 @@ begin
   assert txiki.delete_link(r.code, r.token), 'delete_link finds the link';
   assert not exists (select 1 from txiki.clicks), 'delete_link removes bot rows';
   raise notice 'PASS: bots';
+end $$;
+
+do $$
+declare r record; c record; v_stats jsonb; v text;
+begin
+  perform t.reset();
+  delete from txiki.asn_ranges; delete from txiki.asn_orgs; delete from txiki.city_es_ranges;
+  select * into r from t.mk();
+
+  assert txiki.network_for('198.51.100.5') is null and txiki.city_for('198.51.100.5') is null,
+    'empty range tables give null';
+
+  insert into txiki.asn_orgs values (1, 'Telefonica de Espana'), (2, repeat('N', 120));
+  insert into txiki.asn_ranges values
+    ('203.0.113.0', '203.0.113.255', 1),
+    ('2001:db8::', '2001:db8:ffff:ffff:ffff:ffff:ffff:ffff', 2),
+    ('10.0.0.0', '10.0.0.255', 99);
+  insert into txiki.city_es_ranges values
+    ('203.0.113.0', '203.0.113.127', 'Pozuelo de Alarcon', 'Madrid'),
+    ('203.0.113.128', '203.0.113.255', 'Madrid', 'Madrid'),
+    ('2001:db8::', '2001:db8::ffff', 'Vigo', null);
+
+  perform t.click(r.code, '203.0.113.7');
+  assert (select network from txiki.clicks) = 'Telefonica de Espana', 'network from a v4 range';
+  assert (select city from txiki.clicks) = 'Pozuelo de Alarcon, Madrid', 'city is "city, region"';
+  delete from txiki.clicks;
+
+  perform t.click(r.code, '203.0.113.200');
+  assert (select city from txiki.clicks) = 'Madrid', 'city alone when region equals city';
+  delete from txiki.clicks;
+
+  perform t.click(r.code, '2001:db8::1');
+  assert (select length(network) from txiki.clicks) = 80, 'v6 network is found and cut to 80';
+  assert (select city from txiki.clicks) = 'Vigo', 'city alone when region is null';
+  delete from txiki.clicks;
+
+  perform t.click(r.code, '203.0.114.1');
+  assert (select network is null and city is null from txiki.clicks), 'outside every range gives null';
+  delete from txiki.clicks;
+
+  perform t.click(r.code, '10.0.0.5');
+  assert (select network is null from txiki.clicks), 'a range whose organisation is unknown gives null';
+  delete from txiki.clicks;
+
+  assert txiki.network_for('2001:db9::1') is null and txiki.network_for('0.0.0.1') is null,
+    'addresses past the last range of their family give null';
+  insert into txiki.asn_ranges values ('::ffff:10.1.0.0', '::ffff:10.1.0.255', 1);
+  assert txiki.network_for('10.1.0.5') is null, 'a v4 address does not match a v6 range';
+  delete from txiki.asn_ranges where family(ip_start) = 6 and org_id = 1;
+
+  perform txiki.record_click(r.code, '203.0.113.7', 'FR', 'Chrome', 'Android', 'mobile', null, null, null);
+  assert (select network from txiki.clicks) = 'Telefonica de Espana' and (select city from txiki.clicks) is null,
+    'outside Spain the city is null and the network stays';
+  delete from txiki.clicks;
+  perform txiki.record_click(r.code, '203.0.113.7', null, 'Chrome', 'Android', 'mobile', null, null, null);
+  assert (select city from txiki.clicks) is null, 'no country, no city';
+  delete from txiki.clicks;
+
+  foreach v in array array['', 'garbage', '999.1.1.1', '203.0.113'] loop
+    select * into c from txiki.record_click(r.code, v, 'ES', 'Chrome', 'Android', 'mobile', null, null, null);
+    assert c.target = 'https://example.com/a', 'invalid ip still redirects: ' || v;
+  end loop;
+  assert (select count(*) from txiki.clicks where network is null and city is null) = 4,
+    'invalid ips are recorded with nulls';
+  delete from txiki.clicks;
+  perform txiki.record_click(r.code, null, 'ES', 'Chrome', 'Android', 'mobile', null, null, null);
+  assert (select network is null from txiki.clicks), 'null ip is recorded with nulls';
+  delete from txiki.clicks;
+  perform t.click(r.code, '203.0.113.7/24');
+  assert (select network from txiki.clicks) = 'Telefonica de Espana', 'a mask on the ip is ignored';
+  delete from txiki.clicks;
+
+  perform txiki.record_click(r.code, '203.0.113.7', 'ES', 'Chrome', 'Android', 'mobile', null, null, null, true);
+  assert (select bot and network is not null and city is not null from txiki.clicks),
+    'bot clicks store network and city too';
+  delete from txiki.clicks;
+
+  perform txiki.record_click(r.code, '1.1.1.1', 'ES', 'Chrome', 'Android', 'mobile', null, null, null, false,
+    'Pixel 7 Pro', 'phone', 'qr-flyer-2');
+  assert (select (model, screen, channel) from txiki.clicks) = row('Pixel 7 Pro'::text, 'phone'::text, 'qr-flyer-2'::text),
+    'valid model, screen and channel are stored';
+  delete from txiki.clicks;
+
+  perform txiki.record_click(r.code, '1.1.1.1', 'ES', 'Chrome', 'Android', 'mobile', null, null, null, false,
+    'SM-A536B (x)+1._', 'small-phone', 'a');
+  assert (select (model, screen, channel) from txiki.clicks) = row('SM-A536B (x)+1._'::text, 'small-phone'::text, 'a'::text),
+    'allowed model characters and the small-phone screen';
+  delete from txiki.clicks;
+
+  foreach v in array array['tablet', 'laptop', 'large'] loop
+    perform txiki.record_click(r.code, '1.1.1.1', null, 'Chrome', 'Android', 'mobile', null, null, null, false, null, v, null);
+    assert (select screen from txiki.clicks) = v, 'screen accepted: ' || v;
+    delete from txiki.clicks;
+  end loop;
+
+  perform txiki.record_click(r.code, '1.1.1.1', null, 'Chrome', 'Android', 'mobile', null, null, null, false,
+    repeat('m', 41), 'huge', 'Direct');
+  assert (select model is null and screen is null and channel is null from txiki.clicks),
+    'too long model, unknown screen and uppercase channel give null';
+  delete from txiki.clicks;
+  perform txiki.record_click(r.code, '1.1.1.1', null, 'Chrome', 'Android', 'mobile', null, null, null, false,
+    'Pixel<script>', 'Phone', repeat('c', 25));
+  assert (select model is null and screen is null and channel is null from txiki.clicks),
+    'bad characters, wrong case and long channel give null';
+  delete from txiki.clicks;
+  perform txiki.record_click(r.code, '1.1.1.1', null, 'Chrome', 'Android', 'mobile', null, null, null, false,
+    '', '', 'a/b');
+  assert (select model is null and screen is null and channel is null from txiki.clicks),
+    'empty and slashed values give null';
+  delete from txiki.clicks;
+  perform txiki.record_click(r.code, '1.1.1.1', null, 'Chrome', 'Android', 'mobile', null, null, null);
+  assert (select model is null and screen is null and channel is null from txiki.clicks),
+    'the old call shape still works';
+  delete from txiki.clicks;
+
+  v := t.err(format('insert into txiki.clicks (code, browser, os, device, visitor, screen) values (%L, ''a'', ''b'', ''c'', ''\x01'', ''huge'')', r.code));
+  assert v like '%clicks_screen_check%', 'the table rejects an unknown screen: ' || coalesce(v, 'no error');
+  v := t.err(format('insert into txiki.clicks (code, browser, os, device, visitor, channel) values (%L, ''a'', ''b'', ''c'', ''\x01'', ''Bad'')', r.code));
+  assert v like '%clicks_channel_check%', 'the table rejects a bad channel: ' || coalesce(v, 'no error');
+
+  perform t.click(r.code, '203.0.113.7');
+  perform t.click(r.code, '203.0.113.200');
+  perform txiki.record_click(r.code, '203.0.113.9', 'ES', 'Chrome', 'Android', 'mobile', null, null, null, false,
+    'Pixel 7', 'phone', 'qr');
+  perform txiki.record_click(r.code, '203.0.113.9', 'ES', 'Chrome', 'Android', 'mobile', null, null, null, true,
+    'Bot Model', 'large', 'botchan');
+  set role anon;
+  v_stats := txiki.link_stats(r.code, r.token, 'UTC');
+  reset role;
+  assert v_stats->'networks'->0 = '{"key": "Telefonica de Espana", "count": 3}'::jsonb, 'networks list, bots excluded';
+  assert jsonb_array_length(v_stats->'cities') = 2 and v_stats->'cities'->0->>'count' = '2', 'cities list, bots excluded';
+  assert v_stats->'models' = '[{"key": null, "count": 2}, {"key": "Pixel 7", "count": 1}]'::jsonb, 'models list, bots excluded';
+  assert v_stats->'screens' = '[{"key": null, "count": 2}, {"key": "phone", "count": 1}]'::jsonb, 'screens list, bots excluded';
+  assert v_stats->'channels' = '[{"key": null, "count": 2}, {"key": "qr", "count": 1}]'::jsonb, 'channels list, bots excluded';
+  assert (select array_agg(k order by k) from jsonb_object_keys(v_stats->'recent'->0) k)
+    = array['at', 'browser', 'channel', 'city', 'country', 'device', 'network', 'os', 'referrer_host'], 'recent keys';
+  assert v_stats->'recent'->0->>'channel' = 'qr' and v_stats->'recent'->0->>'network' = 'Telefonica de Espana'
+    and v_stats->'recent'->0->>'city' = 'Pozuelo de Alarcon, Madrid', 'recent carries network, city and channel';
+  assert not (v_stats::text like '%Bot Model%' or v_stats::text like '%botchan%'), 'bot dimensions never reach the stats';
+  delete from txiki.asn_ranges; delete from txiki.asn_orgs; delete from txiki.city_es_ranges;
+  raise notice 'PASS: dimensions';
 end $$;
 
 select t.reset();
