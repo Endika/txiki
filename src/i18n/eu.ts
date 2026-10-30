@@ -36,6 +36,18 @@ export const eu: Record<MessageKey, string> = {
   urlPlaceholder: 'https://…',
   askLocationLabel: 'Eskatu kokapen zehatza',
   askLocationHint: 'Birbideratu aurretik, irekitzen duenari galdetuko zaio. Ezetz esan dezake.',
+  noteLabel: 'Oharra (zuk bakarrik ikusten duzu)',
+  noteHint: 'Non partekatu zenuen gogoratzeko, adib. «CV · X enpresa». Zifratuta gordetzen da.',
+  noteTooLong: 'Oharrak gehienez {max} karaktere izan ditzake.',
+  noteCreateFailed: 'Ezin izan da oharra gorde; panelean gehi dezakezu.',
+  noteOnCard: 'Oharra: {note}',
+  noteAdd: 'Gehitu oharra',
+  noteEdit: 'Editatu',
+  noteUnreadable: 'Oharra ezin da irakurri',
+  noteSave: 'Gorde',
+  noteCancel: 'Utzi',
+  noteSaving: 'Gordetzen…',
+  noteSaveError: 'Ezin izan da oharra gorde. Saiatu berriro.',
   createButton: 'Laburtu',
   creating: 'Laburtzen…',
   readyTitle: 'Zure esteka prest dago',
@@ -204,6 +216,8 @@ export const eu: Record<MessageKey, string> = {
     'Zure IParen hash ezizendatu bat 2 egunez, orduko sor ditzakezun estekak mugatzeko.',
   privacyCreateLocal:
     'Nabigatzaile honek zure estekak eta haien gakoak localStorage-n gordetzen ditu, «Nire estekak» atalean erakusteko. Zure gailuan geratzen dira.',
+  privacyCreateNote:
+    'Aukerako oharra zure nabigatzailean zifratzen da linkaren giltzarekin: zerbitzariak irakurri ezin den moduan gordetzen du eta ezin du irakurri.',
   privacyBasisTitle: 'Oinarri juridikoa',
   privacyBasis:
     'Esteka baten estatistika agregatuak partekatzen duenaren interes legitimoan oinarritzen dira: edozein esteka-laburtzailek egiten du hori, eta datuak minimoak dira. Kokapena zure baimenean oinarritzen da: uko egin diezaiokezu, eta esteka hala ere irekitzen da.',

@@ -8,6 +8,8 @@ import {
 } from '@/api/port'
 import { h, icon } from '@/dom'
 import { t, type MessageKey } from '@/i18n'
+import { encryptNote, NOTE_MAX } from '@/note-crypto'
+import { noteTooLong } from '@/note-state'
 import { shortLink, statsHash, statsLink } from '@/route'
 import { saveLink } from '@/storage'
 import type { TurnstileHandle } from '@/turnstile'
@@ -15,7 +17,14 @@ import { displayUrl, normalizeUrl } from '@/url'
 import { copyButton, fallbackInput } from './copy'
 import type { View, ViewDeps } from './types'
 
-type Result = { link: string; stats: string; hash: string; saved: boolean }
+type Result = {
+  link: string
+  stats: string
+  hash: string
+  saved: boolean
+  note: string | null
+  noteFailed: boolean
+}
 
 function errorKey(cause: unknown): MessageKey {
   if (cause instanceof InvalidUrlError) return 'errInvalidUrl'
@@ -30,6 +39,8 @@ function errorKey(cause: unknown): MessageKey {
 export function createView(container: HTMLElement, deps: ViewDeps): View {
   let url = ''
   let askLocation = false
+  let note = ''
+  let noteInvalid = false
   let busy = false
   let error: MessageKey | null = null
   let result: Result | null = null
@@ -79,6 +90,12 @@ export function createView(container: HTMLElement, deps: ViewDeps): View {
       paint()
       return
     }
+    const noteText = note.trim()
+    noteInvalid = noteTooLong(noteText)
+    if (noteInvalid) {
+      paint()
+      return
+    }
     if (!token) {
       error = captchaFailed ? 'errCaptchaLoad' : 'errCaptchaPending'
       paint()
@@ -92,6 +109,16 @@ export function createView(container: HTMLElement, deps: ViewDeps): View {
     try {
       const created = await deps.api.create(target, askLocation, spent)
       if (disposed) return
+      let noteSaved = noteText === ''
+      if (!noteSaved) {
+        try {
+          const blob = await encryptNote(created.token, created.code, noteText)
+          noteSaved = await deps.api.setNote(created.code, created.token, blob)
+        } catch {
+          noteSaved = false
+        }
+        if (disposed) return
+      }
       const base = deps.location.origin + deps.location.pathname
       const saved = saveLink(deps.storage, {
         code: created.code,
@@ -106,6 +133,8 @@ export function createView(container: HTMLElement, deps: ViewDeps): View {
         stats: statsLink(created.code, created.token, base),
         hash: statsHash(created.code, created.token),
         saved,
+        note: noteText !== '' && noteSaved ? noteText : null,
+        noteFailed: !noteSaved,
       }
       animate = true
       busy = false
@@ -123,6 +152,8 @@ export function createView(container: HTMLElement, deps: ViewDeps): View {
 
   function again(): void {
     url = ''
+    note = ''
+    noteInvalid = false
     askLocation = false
     error = null
     result = null
@@ -155,6 +186,9 @@ export function createView(container: HTMLElement, deps: ViewDeps): View {
           ' ',
           t('notSavedNote'),
         )
+    const noteWarning = done.noteFailed
+      ? h('p', { class: 'note', role: 'status' }, t('noteCreateFailed'))
+      : null
     const cls = animate ? 'rise' : ''
     return [
       h(
@@ -175,6 +209,9 @@ export function createView(container: HTMLElement, deps: ViewDeps): View {
           ),
           linkNote,
         ),
+        done.note === null
+          ? null
+          : h('p', { class: 'notetext' }, t('noteOnCard', { note: done.note })),
       ),
       h(
         'section',
@@ -198,6 +235,7 @@ export function createView(container: HTMLElement, deps: ViewDeps): View {
           keyNote,
         ),
         warning,
+        noteWarning,
         h('a', { class: 'btn', href: done.hash }, t('viewStats')),
         h('button', { type: 'button', class: 'btn sec', onclick: again }, t('createAnother')),
       ),
@@ -221,6 +259,22 @@ export function createView(container: HTMLElement, deps: ViewDeps): View {
     input.addEventListener('input', () => {
       url = input.value
     })
+    const noteInput = h('input', {
+      class: 'field',
+      id: 'note',
+      type: 'text',
+      autocomplete: 'off',
+      'aria-describedby': 'note-hint note-error',
+    })
+    noteInput.value = note
+    noteInput.addEventListener('input', () => {
+      note = noteInput.value
+      if (noteInvalid && !noteTooLong(note.trim())) {
+        noteInvalid = false
+        paint()
+      }
+    })
+    const noteProblem = h('p', { class: 'field-error', id: 'note-error', role: 'alert' })
     const check = h('input', { type: 'checkbox', id: 'ask-location' })
     check.checked = askLocation
     check.addEventListener('change', () => {
@@ -246,6 +300,8 @@ export function createView(container: HTMLElement, deps: ViewDeps): View {
     paint = (): void => {
       problem.textContent = error ? t(error) : ''
       input.setAttribute('aria-invalid', error === 'errInvalidUrl' ? 'true' : 'false')
+      noteProblem.textContent = noteInvalid ? t('noteTooLong', { max: NOTE_MAX }) : ''
+      noteInput.setAttribute('aria-invalid', String(noteInvalid))
       retry.hidden = !captchaFailed
       submitBtn.disabled = busy
       submitBtn.setAttribute('aria-busy', String(busy))
@@ -261,6 +317,14 @@ export function createView(container: HTMLElement, deps: ViewDeps): View {
       h('h1', { tabindex: '-1' }, t('createTitle')),
       h('p', { class: 'lead' }, t('createLead')),
       h('div', {}, h('label', { class: 'label', for: 'url' }, t('urlLabel')), input),
+      h(
+        'div',
+        {},
+        h('label', { class: 'label', for: 'note' }, t('noteLabel')),
+        noteInput,
+        h('p', { class: 'hint', id: 'note-hint' }, t('noteHint')),
+        noteProblem,
+      ),
       h(
         'label',
         { class: 'check' },

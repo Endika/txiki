@@ -1,6 +1,7 @@
 import { h } from '@/dom'
 import { formatNumber, isRecent, relativeTime } from '@/format'
 import { t } from '@/i18n'
+import { readNote } from '@/note-state'
 import { statsHash } from '@/route'
 import { loadLinks, type SavedLink } from '@/storage'
 import { displayTarget } from '@/url'
@@ -8,8 +9,15 @@ import type { View, ViewDeps } from './types'
 
 const CONCURRENCY = 4
 
-type Summary = { total: number; lastAt: string | null } | 'gone' | 'error'
-type Row = { li: HTMLElement; a: HTMLElement; n: HTMLElement; when: HTMLElement }
+type Summary = { total: number; lastAt: string | null; note: string | null } | 'gone' | 'error'
+type Row = {
+  li: HTMLElement
+  a: HTMLElement
+  title: HTMLElement
+  n: HTMLElement
+  host: HTMLElement
+  when: HTMLElement
+}
 
 export function linksView(container: HTMLElement, deps: ViewDeps): View {
   const links = loadLinks(deps.storage)
@@ -39,6 +47,11 @@ export function linksView(container: HTMLElement, deps: ViewDeps): View {
         fresh = isRecent(summary.lastAt, now)
       } else when = t('noClicks')
     }
+    const note = typeof summary === 'object' ? summary.note : null
+    const host = link.target ? displayTarget(link.target) : ''
+    row.title.textContent = note ?? link.code
+    row.title.classList.toggle('titled', note !== null)
+    row.host.textContent = note === null ? host : host ? `${link.code} · ${host}` : link.code
     row.a.classList.toggle('fresh', fresh)
     row.n.replaceChildren(h('span', { class: 'sr' }, `${t('clicksSr')}: `), count)
     row.when.textContent = when
@@ -51,7 +64,14 @@ export function linksView(container: HTMLElement, deps: ViewDeps): View {
       for (let link = queue.shift(); link; link = queue.shift()) {
         try {
           const stats = await deps.api.stats(link.code, link.token, tz)
-          summaries.set(link.code, stats ? { total: stats.total, lastAt: stats.lastAt } : 'gone')
+          if (stats) {
+            const note = await readNote(link.token, link.code, stats.note)
+            summaries.set(link.code, {
+              total: stats.total,
+              lastAt: stats.lastAt,
+              note: note.kind === 'text' ? note.text : null,
+            })
+          } else summaries.set(link.code, 'gone')
         } catch {
           summaries.set(link.code, 'error')
         }
@@ -65,16 +85,11 @@ export function linksView(container: HTMLElement, deps: ViewDeps): View {
   function row(link: SavedLink): HTMLElement {
     const n = h('span', { class: 'n' })
     const when = h('span', { class: 'when' })
-    const a = h(
-      'a',
-      { class: 'li', href: statsHash(link.code, link.token) },
-      h('span', { class: 'code' }, link.code),
-      n,
-      h('span', { class: 'host' }, link.target ? displayTarget(link.target) : ''),
-      when,
-    )
+    const title = h('span', { class: 'code' }, link.code)
+    const host = h('span', { class: 'host' }, link.target ? displayTarget(link.target) : '')
+    const a = h('a', { class: 'li', href: statsHash(link.code, link.token) }, title, n, host, when)
     const li = h('li', {}, a)
-    rows.set(link.code, { li, a, n, when })
+    rows.set(link.code, { li, a, title, n, host, when })
     return li
   }
 

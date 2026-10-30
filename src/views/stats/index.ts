@@ -1,6 +1,8 @@
 import type { Stats } from '@/api/port'
 import { icon, h } from '@/dom'
 import { t } from '@/i18n'
+import { encryptNote } from '@/note-crypto'
+import { readNote, type NoteState } from '@/note-state'
 import { loadLinks, removeLink, saveLink } from '@/storage'
 import { type WorldMap } from '../map'
 import type { View, ViewDeps } from '../types'
@@ -21,6 +23,7 @@ export function statsView(
   let deleting = false
   let focused = false
   let deleteFailed = false
+  let note: NoteState = { kind: 'none' }
   let mapView: WorldMap | null = null
   const { tz } = deps.client
 
@@ -41,6 +44,8 @@ export function statsView(
             createdAt: stats.createdAt,
           })
         }
+        note = await readNote(token, code, stats.note)
+        if (disposed) return
         state = { kind: 'ready', stats }
       }
     } catch {
@@ -48,6 +53,17 @@ export function statsView(
       state = { kind: 'error' }
     }
     draw()
+  }
+
+  async function saveNote(text: string | null): Promise<boolean> {
+    try {
+      const blob = text === null ? null : await encryptNote(token, code, text)
+      if (!(await deps.api.setNote(code, token, blob))) return false
+    } catch {
+      return false
+    }
+    note = text === null ? { kind: 'none' } : { kind: 'text', text }
+    return true
   }
 
   async function remove(): Promise<void> {
@@ -127,6 +143,7 @@ export function statsView(
             deleting,
             deleteFailed,
             onRemove: () => void remove(),
+            note: { note, save: saveNote },
             map: {
               disposed: () => disposed,
               adopt: (map) => {

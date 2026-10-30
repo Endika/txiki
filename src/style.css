@@ -382,12 +382,14 @@ legend {
   max-width: 100%;
 }
 
-.error {
+.error,
+.field-error {
   font-size: 13px;
   color: var(--s-err);
 }
 
-.error:empty {
+.error:empty,
+.field-error:empty {
   display: none;
 }
 
@@ -1192,4 +1194,55 @@ a.li:hover {
   .foot {
     width: calc(100% - 28px);
   }
+}
+
+/* Note */
+.noterow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 12px;
+  margin-top: 4px;
+  min-width: 0;
+  font-size: 13.5px;
+}
+
+.notetext {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.notetext.dim {
+  color: var(--s-muted);
+  font-style: italic;
+}
+
+.noterow .link-btn {
+  color: var(--s-muted);
+  font-size: 13px;
+}
+
+.noterow .link-btn:hover {
+  color: var(--s-fg);
+}
+
+.noterow .link-btn .icon {
+  vertical-align: -2px;
+}
+
+.noteform {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+}
+
+.noteform-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.li .code.titled {
+  font: 600 14px/1.35 var(--sans);
+  overflow-wrap: anywhere;
 }

@@ -34,6 +34,18 @@ export const es = {
   urlPlaceholder: 'https://…',
   askLocationLabel: 'Pedir ubicación exacta',
   askLocationHint: 'Antes de redirigir, se preguntará a quien lo abra. Puede decir que no.',
+  noteLabel: 'Nota (solo la ves tú)',
+  noteHint: 'Para acordarte de dónde lo compartiste, p. ej. «CV · Empresa X». Va cifrada.',
+  noteTooLong: 'La nota admite hasta {max} caracteres.',
+  noteCreateFailed: 'No se pudo guardar la nota; puedes añadirla desde el panel.',
+  noteOnCard: 'Nota: {note}',
+  noteAdd: 'Añadir nota',
+  noteEdit: 'Editar',
+  noteUnreadable: 'Nota ilegible',
+  noteSave: 'Guardar',
+  noteCancel: 'Cancelar',
+  noteSaving: 'Guardando…',
+  noteSaveError: 'No se ha podido guardar la nota. Inténtalo de nuevo.',
   createButton: 'Acortar',
   creating: 'Acortando…',
   readyTitle: 'Tu enlace está listo',
@@ -201,6 +213,8 @@ export const es = {
     'Un hash seudónimo de tu IP durante 2 días, para limitar los links que puedes crear por hora.',
   privacyCreateLocal:
     'Este navegador guarda tus links y sus llaves en localStorage para mostrártelos en «Mis links». Se quedan en tu dispositivo.',
+  privacyCreateNote:
+    'La nota opcional se cifra en tu navegador con la llave del link: el servidor la guarda ilegible y no puede leerla.',
   privacyBasisTitle: 'Base legal',
   privacyBasis:
     'Las estadísticas agregadas de un link se basan en el interés legítimo de quien lo comparte: es lo que hace cualquier acortador y los datos son mínimos. La ubicación se basa en tu consentimiento: puedes rechazarla y el link se abre igual.',

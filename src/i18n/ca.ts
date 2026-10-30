@@ -36,6 +36,18 @@ export const ca: Record<MessageKey, string> = {
   urlPlaceholder: 'https://…',
   askLocationLabel: 'Demana ubicació exacta',
   askLocationHint: 'Abans de redirigir, es preguntarà a qui l’obri. Pot dir que no.',
+  noteLabel: 'Nota (només la veus tu)',
+  noteHint: 'Per recordar on el vas compartir, p. ex. «CV · Empresa X». Va xifrada.',
+  noteTooLong: 'La nota admet fins a {max} caràcters.',
+  noteCreateFailed: 'No s’ha pogut desar la nota; pots afegir-la des del panell.',
+  noteOnCard: 'Nota: {note}',
+  noteAdd: 'Afegeix una nota',
+  noteEdit: 'Edita',
+  noteUnreadable: 'Nota il·legible',
+  noteSave: 'Desa',
+  noteCancel: 'Cancel·la',
+  noteSaving: 'Desant…',
+  noteSaveError: 'No s’ha pogut desar la nota. Torna-ho a provar.',
   createButton: 'Escurça',
   creating: 'Escurçant…',
   readyTitle: 'El teu enllaç és a punt',
@@ -203,6 +215,8 @@ export const ca: Record<MessageKey, string> = {
     'Un hash pseudònim de la teva IP durant 2 dies, per limitar els links que pots crear per hora.',
   privacyCreateLocal:
     'Aquest navegador desa els teus links i les seves claus a localStorage per mostrar-te’ls a «Els meus links». Es queden al teu dispositiu.',
+  privacyCreateNote:
+    'La nota opcional es xifra al teu navegador amb la clau del link: el servidor la desa il·legible i no la pot llegir.',
   privacyBasisTitle: 'Base legal',
   privacyBasis:
     'Les estadístiques agregades d’un link es basen en l’interès legítim de qui el comparteix: és el que fa qualsevol escurçador i les dades són mínimes. La ubicació es basa en el teu consentiment: la pots rebutjar i el link s’obre igualment.',
