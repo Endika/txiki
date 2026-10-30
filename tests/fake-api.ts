@@ -1,5 +1,11 @@
 import { referrerHost } from '../supabase/functions/_shared/request.ts'
-import { CaptchaError, InvalidUrlError, type ClickResult, type Stats, type TxikiApi } from '@/api'
+import {
+  CaptchaError,
+  InvalidUrlError,
+  type ClickResult,
+  type Stats,
+  type TxikiApi,
+} from '@/api/port'
 
 type FakeClick = { at: string; lang: string; tz: string; referrer: string; bot: boolean }
 

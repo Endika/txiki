@@ -7,9 +7,8 @@ import {
   NetworkError,
   RateLimitedError,
   RequestError,
-  createHttpApi,
-  parseStats,
-} from '@/api'
+} from '@/api/port'
+import { createHttpApi, parseStats } from '@/api/http'
 import { createFakeApi } from './fake-api'
 
 const URL_ = 'https://proj.supabase.co'

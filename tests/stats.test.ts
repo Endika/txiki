@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { NetworkError, type Stats, type TxikiApi } from '@/api'
+import { NetworkError, type Stats, type TxikiApi } from '@/api/port'
 import { localDay } from '@/format'
 import { icon } from '@/dom'
 import { t } from '@/i18n'

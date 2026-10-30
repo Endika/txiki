@@ -1,4 +1,4 @@
-import type { ClickResult, TxikiApi } from '@/api'
+import type { ClickResult, TxikiApi } from '@/api/port'
 import { h, icon } from '@/dom'
 import {
   LOCALES,

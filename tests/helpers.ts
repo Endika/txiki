@@ -1,5 +1,5 @@
 import { vi } from 'vitest'
-import type { Stats, TxikiApi } from '@/api'
+import type { Stats, TxikiApi } from '@/api/port'
 import type { TurnstileCallbacks, TurnstileHandle } from '@/turnstile'
 import { mountApp } from '@/app'
 import type { ClientContext } from '@/views/types'

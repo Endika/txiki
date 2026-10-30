@@ -1,4 +1,4 @@
-import { InvalidTargetError, type ClickResult } from '@/api'
+import { InvalidTargetError, type ClickResult } from '@/api/port'
 import { h, icon } from '@/dom'
 import { t } from '@/i18n'
 import { displayTarget } from '@/url'

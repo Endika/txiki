@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { CaptchaError, InvalidTargetError, InvalidUrlError, NetworkError } from '@/api'
+import { CaptchaError, InvalidTargetError, InvalidUrlError, NetworkError } from '@/api/port'
 import { t } from '@/i18n'
 import { loadLinks } from '@/storage'
 import { $, CLIENT, mount, newFake, settle, type, type Harness } from './helpers'

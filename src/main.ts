@@ -1,5 +1,5 @@
 import './style.css'
-import { createHttpApi } from '@/api'
+import { createHttpApi } from '@/api/http'
 import { mountApp } from '@/app'
 import { renderTurnstile } from '@/turnstile'
 
