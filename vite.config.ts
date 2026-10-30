@@ -1,13 +1,16 @@
 import { defineConfig, loadEnv, type Plugin } from 'vite'
 import { resolve } from 'node:path'
 
+const TURNSTILE = 'https://challenges.cloudflare.com'
+
 function securityHeaders(connectSrc: string): Plugin {
   const csp = [
     "default-src 'none'",
-    "script-src 'self'",
+    `script-src 'self' ${TURNSTILE}`,
     "style-src 'self'",
     "img-src 'self'",
     `connect-src ${connectSrc}`,
+    `frame-src ${TURNSTILE}`,
     "base-uri 'none'",
     "form-action 'none'",
   ].join('; ')
@@ -23,7 +26,7 @@ function securityHeaders(connectSrc: string): Plugin {
         },
         {
           tag: 'meta',
-          attrs: { name: 'referrer', content: 'no-referrer' },
+          attrs: { name: 'referrer', content: 'strict-origin' },
           injectTo: 'head-prepend',
         },
         { tag: 'meta', attrs: { name: 'robots', content: 'noindex' }, injectTo: 'head-prepend' },
@@ -34,7 +37,7 @@ function securityHeaders(connectSrc: string): Plugin {
 
 export default defineConfig(({ mode }) => {
   const url = loadEnv(mode, process.cwd(), 'VITE_').VITE_SUPABASE_URL
-  const connectSrc = url ? new URL(url).origin : "'none'"
+  const connectSrc = url ? `'self' ${new URL(url).origin}` : "'self'"
   return {
     base: '/txiki/',
     resolve: { alias: { '@': resolve(import.meta.dirname, 'src') } },

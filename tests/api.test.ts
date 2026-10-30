@@ -3,6 +3,7 @@ import {
   CapacityError,
   CaptchaError,
   InvalidUrlError,
+  InvalidTargetError,
   NetworkError,
   RateLimitedError,
   RequestError,
@@ -181,6 +182,11 @@ describe('click', () => {
       await expect(setup(reply(200, body)).api.click(CODE, ctx)).rejects.toBeInstanceOf(
         NetworkError,
       )
+    }
+    for (const target of ['javascript:alert(1)', 'not a url']) {
+      await expect(
+        setup(reply(200, { target, askLocation: false, locationToken: null })).api.click(CODE, ctx),
+      ).rejects.toBeInstanceOf(InvalidTargetError)
     }
   })
 
