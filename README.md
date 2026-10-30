@@ -31,11 +31,11 @@ npm run test:sql   # SQL tests, needs Docker
 
 `1x00000000000000000000AA` is Cloudflare's always-pass test key.
 
-Production is applied by hand from the repo root with `scripts/apply-prod.sh` (database) and `scripts/deploy-functions.sh` (Edge Functions). Both read a Supabase access token from `~/.config/supabase/mcp-token`.
+Production is applied by hand from the repo root with `scripts/apply-prod.sh` (database) and `scripts/deploy-functions.sh` (Edge Functions). Both read a Supabase access token from `~/.config/supabase/mcp-token`. Once a month `scripts/load-geo-db.sh` loads the network and Spanish city data (DB-IP Lite) the same way.
 
 ## Attribution
 
-IP to country data by [DB-IP](https://db-ip.com) (CC BY 4.0).
+IP to country, network and city data by [DB-IP](https://db-ip.com) (CC BY 4.0).
 
 ## License
 
