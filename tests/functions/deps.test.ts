@@ -54,7 +54,7 @@ describe('timeouts', () => {
     expect((f.mock.calls[0] as unknown as [string, RequestInit])[1].signal).toBeInstanceOf(
       AbortSignal,
     )
-    const g = vi.fn(async () => new Response('{"success":true}'))
+    const g = vi.fn(async () => new Response('{"success":true,"hostname":"endika.github.io"}'))
     await createTurnstileVerifier('s', g as unknown as typeof fetch)('t', null)
     expect((g.mock.calls[0] as unknown as [string, RequestInit])[1].signal).toBeInstanceOf(
       AbortSignal,
@@ -82,7 +82,7 @@ describe('createTurnstileVerifier', () => {
   }
 
   it('posts a form with secret, response and remoteip', async () => {
-    const fetchFn = fake({ success: true })
+    const fetchFn = fake({ success: true, hostname: 'endika.github.io' })
     const verify = createTurnstileVerifier('sec', fetchFn as unknown as typeof fetch)
     expect(await verify('tok', '203.0.113.7')).toBe(true)
     const [url, init] = fetchFn.mock.calls[0] as unknown as [string, RequestInit]
@@ -95,14 +95,40 @@ describe('createTurnstileVerifier', () => {
   })
 
   it('omits remoteip when the ip is null', async () => {
-    const fetchFn = fake({ success: true })
+    const fetchFn = fake({ success: true, hostname: 'endika.github.io' })
     await createTurnstileVerifier('sec', fetchFn as unknown as typeof fetch)('tok', null)
     const init = (fetchFn.mock.calls[0] as unknown as [string, RequestInit])[1]
     expect(new URLSearchParams(init.body as string).has('remoteip')).toBe(false)
   })
 
+  it('accepts every allowed hostname including local dev', async () => {
+    for (const hostname of ['endika.github.io', 'localhost']) {
+      const verify = createTurnstileVerifier('s', fake({ success: true, hostname }) as never)
+      expect(await verify('t', null)).toBe(true)
+    }
+  })
+
+  it('returns false when the token was issued for a foreign hostname', async () => {
+    const verify = createTurnstileVerifier(
+      's',
+      fake({ success: true, hostname: 'evil.example' }) as never,
+    )
+    expect(await verify('t', null)).toBe(false)
+  })
+
+  it('returns false when the hostname is missing or not a string', async () => {
+    for (const body of [{ success: true }, { success: true, hostname: 42 }]) {
+      const verify = createTurnstileVerifier('s', fake(body) as never)
+      expect(await verify('t', null)).toBe(false)
+    }
+  })
+
   it('returns false when success is not true', async () => {
-    for (const body of [{ success: false }, {}, { success: 'true' }]) {
+    for (const body of [
+      { success: false, hostname: 'endika.github.io' },
+      { hostname: 'endika.github.io' },
+      { success: 'true', hostname: 'endika.github.io' },
+    ]) {
       const verify = createTurnstileVerifier('s', fake(body) as unknown as typeof fetch)
       expect(await verify('t', null)).toBe(false)
     }

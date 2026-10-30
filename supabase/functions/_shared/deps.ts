@@ -1,5 +1,8 @@
+import { ALLOWED_ORIGINS } from './request.ts'
+
 const TIMEOUT_MS = 5000
 const SITEVERIFY = 'https://challenges.cloudflare.com/turnstile/v0/siteverify'
+const ALLOWED_HOSTNAMES = new Set([...ALLOWED_ORIGINS].map((o) => new URL(o).hostname))
 
 export function createRpc(url: string, serviceKey: string, fetchFn: typeof fetch = fetch) {
   return async (name: string, args: Record<string, unknown>): Promise<unknown> => {
@@ -37,7 +40,8 @@ export function createTurnstileVerifier(secret: string, fetchFn: typeof fetch = 
         signal: AbortSignal.timeout(TIMEOUT_MS),
       })
       const data: unknown = await res.json()
-      return (data as { success?: unknown } | null)?.success === true
+      const { success, hostname } = (data ?? {}) as { success?: unknown; hostname?: unknown }
+      return success === true && typeof hostname === 'string' && ALLOWED_HOSTNAMES.has(hostname)
     } catch {
       return false
     }
