@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.0](https://github.com/Endika/txiki/compare/v0.10.0...v0.11.0) (2026-10-30)
+
+
+### Features
+
+* **db:** record network, city, model, screen and channel per click ([c0cfd5e](https://github.com/Endika/txiki/commit/c0cfd5eea41d577720aaa90919c65a74d4cdf04c))
+
 ## [0.10.0](https://github.com/Endika/txiki/compare/v0.9.0...v0.10.0) (2026-10-30)
 
 
