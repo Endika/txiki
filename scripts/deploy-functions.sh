@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
-# Builds the geo table and deploys txiki-create and txiki-click to production. Run from the repo root.
+# Builds the geo table and deploys txiki-create and txiki-click to production.
 # GEO_CSV=<path>  use a local DB-IP CSV instead of downloading the current month.
 # NESTED=1        upload the nested layout (txiki-click/index.ts + _shared/*.ts, unverified against the API)
 #                 instead of the default flat one (imports rewritten ../_shared/ -> ./, proven by the spike).
 # DRY_RUN=1       print URLs, files and metadata; no API calls. The secret file is only checked to be
 #                 non-empty; its value is neither sent nor printed.
 set -euo pipefail
+
+cd "$(dirname "$0")/.."
 
 REF=ahvzkoekmwqwozqsgeao
 API="https://api.supabase.com/v1/projects/$REF"
