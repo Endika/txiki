@@ -14,7 +14,9 @@ import { parseRoute, type Route } from '@/route'
 import type { TurnstileCallbacks, TurnstileHandle } from '@/turnstile'
 import { createView } from '@/views/create'
 import { goView } from '@/views/go'
+import { linksView } from '@/views/links'
 import { privacyView } from '@/views/privacy'
+import { statsView } from '@/views/stats'
 import type { View, ViewDeps } from '@/views/types'
 
 export const STORAGE_KEY = 'txiki.locale'
@@ -207,8 +209,12 @@ export function mountApp(root: HTMLElement, deps: AppDeps): () => void {
       clicks,
     }
     switch (current.kind) {
+      case 'links':
+        return linksView(main, viewDeps)
       case 'go':
         return goView(main, viewDeps, current.code)
+      case 'stats':
+        return statsView(main, viewDeps, current.code, current.token)
       default:
         return createView(main, viewDeps)
     }
