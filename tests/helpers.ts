@@ -2,8 +2,11 @@ import { vi } from 'vitest'
 import type { Stats, TxikiApi } from '@/api'
 import type { TurnstileCallbacks, TurnstileHandle } from '@/turnstile'
 import { mountApp } from '@/app'
+import type { ClientContext } from '@/views/types'
 import { setLocale } from '@/i18n'
 import { createFakeApi, type FakeApi } from './fake-api'
+
+export const CLIENT: ClientContext = { lang: 'es-ES', tz: 'Europe/Madrid', referrer: '' }
 
 export const NOW = Date.parse('2026-10-30T12:00:00Z')
 
@@ -38,6 +41,8 @@ export type Options = {
   turnstile?: TurnstileFn
   confirm?: boolean
   framed?: boolean
+  client?: Partial<ClientContext>
+  languages?: readonly string[]
   locale?: string | null
 }
 
@@ -86,6 +91,8 @@ export function mount(options: Options = {}): Harness {
     confirm,
     now: () => NOW,
     isFramed: () => options.framed ?? false,
+    client: { ...CLIENT, ...options.client },
+    languages: options.languages ?? ['en-US'],
   })
   return { root, fake, api, redirect, turnstile, widgets, confirm, storage, dispose }
 }

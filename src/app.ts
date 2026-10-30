@@ -17,7 +17,7 @@ import { goView } from '@/views/go'
 import { linksView } from '@/views/links'
 import { privacyView } from '@/views/privacy'
 import { statsView } from '@/views/stats'
-import type { View, ViewDeps } from '@/views/types'
+import type { ClientContext, View, ViewDeps } from '@/views/types'
 
 export const STORAGE_KEY = 'txiki.locale'
 const SOURCE_URL = 'https://github.com/Endika/txiki'
@@ -31,9 +31,11 @@ export interface AppDeps {
   geolocation: Pick<Geolocation, 'getCurrentPosition'> | null
   webdriver: boolean
   redirect: (url: string) => void
-  confirm?: (message: string) => boolean
-  now?: () => number
-  isFramed?: () => boolean
+  client: ClientContext
+  languages: readonly string[]
+  confirm: (message: string) => boolean
+  now: () => number
+  isFramed: () => boolean
 }
 
 function readStoredLocale(storage: Storage): Locale | null {
@@ -60,7 +62,7 @@ function widthOf(route: Route): 'narrow' | 'mid' | 'wide' {
 }
 
 export function mountApp(root: HTMLElement, deps: AppDeps): () => void {
-  setLocale(readStoredLocale(deps.storage) ?? detectLocale(navigator.languages))
+  setLocale(readStoredLocale(deps.storage) ?? detectLocale(deps.languages))
 
   const picker = h('select', { id: 'locale' })
   for (const locale of LOCALES) {
@@ -176,7 +178,7 @@ export function mountApp(root: HTMLElement, deps: AppDeps): () => void {
   }
 
   function viewFor(): View {
-    const framed = deps.isFramed ? deps.isFramed() : window.top !== window.self
+    const framed = deps.isFramed()
     if (framed) {
       return notice(() => [
         h(
@@ -216,8 +218,9 @@ export function mountApp(root: HTMLElement, deps: AppDeps): () => void {
       geolocation: deps.geolocation,
       webdriver: deps.webdriver,
       redirect: deps.redirect,
-      confirm: deps.confirm ?? ((message) => window.confirm(message)),
-      now: deps.now ?? Date.now,
+      client: deps.client,
+      confirm: deps.confirm,
+      now: deps.now,
       blank,
       clicks,
     }

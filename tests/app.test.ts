@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { CaptchaError, InvalidTargetError, InvalidUrlError, NetworkError } from '@/api'
 import { t } from '@/i18n'
 import { loadLinks } from '@/storage'
-import { $, mount, newFake, settle, type, type Harness } from './helpers'
+import { $, CLIENT, mount, newFake, settle, type, type Harness } from './helpers'
 
 let h: Harness
 
@@ -283,28 +283,24 @@ describe('go view', () => {
     h = mount({ hash: `#${code}`, fake })
     await settle()
     expect(click).toHaveBeenCalledWith(code, {
-      lang: navigator.language,
-      tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      referrer: document.referrer,
+      lang: CLIENT.lang,
+      tz: CLIENT.tz,
+      referrer: CLIENT.referrer,
       bot: false,
     })
   })
 
   it('sends the real referrer when the page has one', async () => {
-    Object.defineProperty(document, 'referrer', {
-      value: 'https://linkedin.com/feed/',
-      configurable: true,
+    const fake = newFake()
+    const click = vi.spyOn(fake, 'click')
+    const { code } = await fake.create('https://example.com/', false, 'token')
+    h = mount({
+      hash: `#${code}`,
+      fake,
+      client: { referrer: 'https://linkedin.com/feed/' },
     })
-    try {
-      const fake = newFake()
-      const click = vi.spyOn(fake, 'click')
-      const { code } = await fake.create('https://example.com/', false, 'token')
-      h = mount({ hash: `#${code}`, fake })
-      await settle()
-      expect(click.mock.calls[0]![1].referrer).toBe('https://linkedin.com/feed/')
-    } finally {
-      delete (document as unknown as { referrer?: string }).referrer
-    }
+    await settle()
+    expect(click.mock.calls[0]![1].referrer).toBe('https://linkedin.com/feed/')
   })
 
   it('shows nothing, not even the header and footer, while the click is pending', async () => {

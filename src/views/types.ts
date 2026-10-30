@@ -1,6 +1,12 @@
 import type { ClickResult, TxikiApi } from '@/api'
 import type { TurnstileCallbacks, TurnstileHandle } from '@/turnstile'
 
+export interface ClientContext {
+  lang: string
+  tz: string
+  referrer: string
+}
+
 export interface ViewDeps {
   api: TxikiApi
   location: Location
@@ -8,6 +14,7 @@ export interface ViewDeps {
   turnstile: (el: HTMLElement, callbacks: TurnstileCallbacks) => TurnstileHandle
   geolocation: Pick<Geolocation, 'getCurrentPosition'> | null
   webdriver: boolean
+  client: ClientContext
   redirect: (url: string) => void
   confirm: (message: string) => boolean
   now: () => number

@@ -45,7 +45,7 @@ export function linksView(container: HTMLElement, deps: ViewDeps): View {
   }
 
   async function fetchAll(): Promise<void> {
-    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+    const { tz } = deps.client
     const queue = [...links]
     const worker = async (): Promise<void> => {
       for (let link = queue.shift(); link; link = queue.shift()) {
