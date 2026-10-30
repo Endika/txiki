@@ -32,6 +32,13 @@ const OSES: [RegExp, Os][] = [
   [/Linux|X11/, 'Linux'],
 ]
 
+const BOT_UA =
+  /HeadlessChrome|(?<!cu)bot\b|crawler|spider|Lighthouse|PhantomJS|facebookexternalhit|^WhatsApp\/|TelegramBot|Slackbot|Discordbot|Twitterbot|LinkedInBot|SkypeUriPreview|Google-InspectionTool|GoogleOther/i
+
+export function isBot(ua: string | null, webdriver: boolean): boolean {
+  return webdriver || BOT_UA.test(ua ?? '')
+}
+
 export function parseUserAgent(ua: string | null): { browser: Browser; os: Os; device: Device } {
   const s = ua ?? ''
   const browser = BROWSERS.find(([re]) => re.test(s))?.[1] ?? 'Other'

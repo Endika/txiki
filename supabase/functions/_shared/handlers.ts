@@ -1,4 +1,4 @@
-import { parseUserAgent } from './ua.ts'
+import { isBot, parseUserAgent } from './ua.ts'
 import { clientIp, corsHeaders, referrerHost } from './request.ts'
 
 export type Deps = {
@@ -140,12 +140,13 @@ export async function handleClick(
   if (early) return early
   const body = await readBody(req, origin)
   if (!body.ok) return body.res
-  const { code, lang, tz, referrer } = body.value
+  const { code, lang, tz, referrer, bot } = body.value
   if (typeof code !== 'string' || !CODE_RE.test(code)) {
     return json(origin, 404, { error: 'not_found' })
   }
   const ip = clientIp(req.headers)
-  const ua = parseUserAgent(req.headers.get('user-agent'))
+  const userAgent = req.headers.get('user-agent')
+  const ua = parseUserAgent(userAgent)
   try {
     const row = firstRow(
       await deps.rpc('record_click', {
@@ -158,6 +159,7 @@ export async function handleClick(
         p_lang: typeof lang === 'string' ? lang : null,
         p_tz: typeof tz === 'string' ? tz : null,
         p_referrer_host: referrerHost(referrer),
+        p_bot: isBot(userAgent, bot === true),
       }),
     )
     if (!row) return json(origin, 404, { error: 'not_found' })
