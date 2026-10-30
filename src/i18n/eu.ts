@@ -114,6 +114,8 @@ export const eu: Record<MessageKey, string> = {
   answerTimes_other: '{n} aldiz ireki dute,',
   answerPeople_one: 'pertsona batek.',
   answerPeople_other: '{n} pertsonak.',
+  botVisits_one: 'Bot-en bisita bat, kontatu gabe.',
+  botVisits_other: '{n} bot-bisita, kontatu gabe.',
   answerNone: 'Oraindik inork ez du ireki.',
   answerNoneSub: 'Norbaitek irekitzen duenean, hemen ikusiko duzu.',
   lastFull: 'Azkena: {when}, {country} aldetik, {device}.',

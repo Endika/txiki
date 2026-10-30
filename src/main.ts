@@ -32,6 +32,7 @@ if (root) {
       return { reset: () => callbacks.onError(), remove: () => {} }
     },
     geolocation: 'geolocation' in navigator ? navigator.geolocation : null,
+    webdriver: navigator.webdriver === true,
     redirect: (target) => location.replace(target),
   })
 }

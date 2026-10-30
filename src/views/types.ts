@@ -7,6 +7,7 @@ export interface ViewDeps {
   storage: Storage
   turnstile: (el: HTMLElement, callbacks: TurnstileCallbacks) => TurnstileHandle
   geolocation: Pick<Geolocation, 'getCurrentPosition'> | null
+  webdriver: boolean
   redirect: (url: string) => void
   confirm: (message: string) => boolean
   now: () => number

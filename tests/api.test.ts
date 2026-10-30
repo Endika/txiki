@@ -142,7 +142,7 @@ describe('click', () => {
     const { api, fetchFn } = setup(
       reply(200, { target: 'https://example.com/', askLocation: true, locationToken: TOKEN }),
     )
-    const ctx = { lang: 'es', tz: 'Europe/Madrid', referrer: '' }
+    const ctx = { lang: 'es', tz: 'Europe/Madrid', referrer: '', bot: true }
     await expect(api.click(CODE, ctx)).resolves.toEqual({
       target: 'https://example.com/',
       askLocation: true,
@@ -159,11 +159,13 @@ describe('click', () => {
 
   it('returns null on 404', async () => {
     const { api } = setup(reply(404, { error: 'not_found' }))
-    await expect(api.click(CODE, { lang: '', tz: '', referrer: '' })).resolves.toBeNull()
+    await expect(
+      api.click(CODE, { lang: '', tz: '', referrer: '', bot: false }),
+    ).resolves.toBeNull()
   })
 
   it('maps 5xx and network failures to NetworkError', async () => {
-    const ctx = { lang: '', tz: '', referrer: '' }
+    const ctx = { lang: '', tz: '', referrer: '', bot: false }
     await expect(
       setup(reply(500, { error: 'server' })).api.click(CODE, ctx),
     ).rejects.toBeInstanceOf(NetworkError)
@@ -173,7 +175,7 @@ describe('click', () => {
   })
 
   it('rejects a malformed or non-http target', async () => {
-    const ctx = { lang: '', tz: '', referrer: '' }
+    const ctx = { lang: '', tz: '', referrer: '', bot: false }
     for (const body of [
       { target: 'https://e.com/', askLocation: 'yes', locationToken: null },
       { target: 'javascript:alert(1)', askLocation: false, locationToken: null },
@@ -192,9 +194,9 @@ describe('click', () => {
 
   it('maps 413 to RequestError', async () => {
     const { api } = setup(reply(413, { error: 'too_large' }))
-    await expect(api.click(CODE, { lang: '', tz: '', referrer: '' })).rejects.toBeInstanceOf(
-      RequestError,
-    )
+    await expect(
+      api.click(CODE, { lang: '', tz: '', referrer: '', bot: false }),
+    ).rejects.toBeInstanceOf(RequestError)
   })
 })
 
@@ -254,6 +256,12 @@ describe('rpc calls', () => {
 })
 
 describe('parseStats', () => {
+  it('reads bots and defaults to 0 when the field is missing', () => {
+    expect(parseStats({ ...rawStats(), bots: 4 }).bots).toBe(4)
+    expect(parseStats(rawStats()).bots).toBe(0)
+    expect(() => parseStats({ ...rawStats(), bots: 'x' })).toThrow()
+  })
+
   it('converts to camelCase and keeps __other__ and null keys', () => {
     const s = parseStats(rawStats())
     expect(s.createdAt).toBe('2026-10-30T10:00:00Z')
@@ -287,7 +295,7 @@ describe('fake api', () => {
   it('creates, clicks, reports stats and removes', async () => {
     const fake = createFakeApi()
     const { code, token } = await fake.create('https://example.com', true, 'cf')
-    const click = await fake.click(code, { lang: 'es', tz: 'UTC', referrer: '' })
+    const click = await fake.click(code, { lang: 'es', tz: 'UTC', referrer: '', bot: false })
     expect(click?.locationToken).not.toBeNull()
     await expect(fake.addLocation(click!.locationToken!, 43.2612, -2.9333)).resolves.toBe(true)
     await expect(fake.addLocation(click!.locationToken!, 1, 1)).resolves.toBe(false)
@@ -296,13 +304,20 @@ describe('fake api', () => {
     expect(stats?.points[0]).toMatchObject({ lat: 43.26, lon: -2.93 })
     await expect(fake.stats(code, 'D'.repeat(43), 'UTC')).resolves.toBeNull()
     await expect(fake.remove(code, token)).resolves.toBe(true)
-    await expect(fake.click(code, { lang: '', tz: '', referrer: '' })).resolves.toBeNull()
+    await expect(
+      fake.click(code, { lang: '', tz: '', referrer: '', bot: false }),
+    ).resolves.toBeNull()
   })
   it('checks the URL before the captcha and stores only the referrer host', async () => {
     const fake = createFakeApi()
     await expect(fake.create('ftp://x', false, '')).rejects.toBeInstanceOf(InvalidUrlError)
     const { code, token } = await fake.create('https://example.com', false, 'cf')
-    await fake.click(code, { lang: '', tz: '', referrer: 'https://news.example.org/a?b=1' })
+    await fake.click(code, {
+      lang: '',
+      tz: '',
+      referrer: 'https://news.example.org/a?b=1',
+      bot: false,
+    })
     const stats = await fake.stats(code, token, 'UTC')
     expect(stats?.recent[0]?.referrerHost).toBe('news.example.org')
   })

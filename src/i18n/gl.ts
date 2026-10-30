@@ -110,6 +110,8 @@ export const gl: Record<MessageKey, string> = {
   answerTimes_other: 'Abríronno {n} veces,',
   answerPeople_one: 'unha persoa.',
   answerPeople_other: '{n} persoas.',
+  botVisits_one: 'Unha visita de bot, non contada.',
+  botVisits_other: '{n} visitas de bots, non contadas.',
   answerNone: 'Aínda ninguén o abriu.',
   answerNoneSub: 'Cando alguén o abra, verálo aquí.',
   lastFull: 'A última, {when}, desde {country}, {device}.',

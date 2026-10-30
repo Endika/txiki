@@ -1,7 +1,7 @@
 import { referrerHost } from '../supabase/functions/_shared/request.ts'
 import { CaptchaError, InvalidUrlError, type ClickResult, type Stats, type TxikiApi } from '@/api'
 
-type FakeClick = { at: string; lang: string; tz: string; referrer: string }
+type FakeClick = { at: string; lang: string; tz: string; referrer: string; bot: boolean }
 
 export type FakeLink = {
   code: string
@@ -97,7 +97,7 @@ export function createFakeApi(options: { now?: () => number } = {}): FakeApi {
         referrer: referrerHost(ctx.referrer) ?? '',
       })
       let locationToken: string | null = null
-      if (link.askLocation) {
+      if (link.askLocation && !ctx.bot) {
         locationToken = random(B64URL, 43)
         locationTokens.set(locationToken, { link, expiresAt: now() + LOCATION_WINDOW_MS })
       }
@@ -120,9 +120,10 @@ export function createFakeApi(options: { now?: () => number } = {}): FakeApi {
       takeFailure()
       const link = owned(code, token)
       if (!link) return null
+      const clicks = link.clicks.filter((c) => !c.bot)
       const byDay = new Map<string, number>()
       const byHour = new Array<number>(24).fill(0)
-      for (const c of link.clicks) {
+      for (const c of clicks) {
         const day = c.at.slice(0, 10)
         byDay.set(day, (byDay.get(day) ?? 0) + 1)
         const hour = new Date(c.at).getUTCHours()
@@ -133,19 +134,20 @@ export function createFakeApi(options: { now?: () => number } = {}): FakeApi {
         createdAt: link.createdAt,
         askLocation: link.askLocation,
         disabled: false,
-        total: link.clicks.length,
-        uniques: link.clicks.length,
-        firstAt: link.clicks[0]?.at ?? null,
-        lastAt: link.clicks.at(-1)?.at ?? null,
+        total: clicks.length,
+        bots: link.clicks.length - clicks.length,
+        uniques: clicks.length,
+        firstAt: clicks[0]?.at ?? null,
+        lastAt: clicks.at(-1)?.at ?? null,
         byDay: [...byDay].sort().map(([day, count]) => ({ day, count })),
         byHour,
         countries: [],
-        browsers: tally(link.clicks.map(() => 'Other')),
-        os: tally(link.clicks.map(() => 'Other')),
-        devices: tally(link.clicks.map(() => 'desktop')),
-        referrers: tally(link.clicks.map((c) => c.referrer || null)),
-        langs: tally(link.clicks.map((c) => c.lang || null)),
-        recent: link.clicks
+        browsers: tally(clicks.map(() => 'Other')),
+        os: tally(clicks.map(() => 'Other')),
+        devices: tally(clicks.map(() => 'desktop')),
+        referrers: tally(clicks.map((c) => c.referrer || null)),
+        langs: tally(clicks.map((c) => c.lang || null)),
+        recent: clicks
           .slice(-50)
           .reverse()
           .map((c) => ({

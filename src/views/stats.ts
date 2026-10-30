@@ -351,6 +351,9 @@ export function statsView(
       note,
       stats.disabled ? h('p', { class: 'band', role: 'status' }, t('disabledBand')) : null,
       ...answer,
+      stats.bots > 0
+        ? h('p', { class: 'hint', role: 'status' }, tCount('botVisits', stats.bots))
+        : null,
       ...(stats.total > 0 ? [h('div', { class: 'blocks' }, ...charts(stats), ...feed(stats))] : []),
       deleteFailed ? h('p', { class: 'error', role: 'alert' }, t('errDelete')) : null,
       h('div', { class: 'foot-row' }, h('span', {}, t('retentionNote')), deleteBtn),

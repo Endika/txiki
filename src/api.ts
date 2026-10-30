@@ -13,6 +13,7 @@ export type Stats = {
   disabled: boolean
   total: number
   uniques: number
+  bots: number
   firstAt: string | null
   lastAt: string | null
   byDay: { day: string; count: number }[]
@@ -42,7 +43,7 @@ export interface TxikiApi {
   ): Promise<{ code: string; token: string }>
   click(
     code: string,
-    ctx: { lang: string; tz: string; referrer: string },
+    ctx: { lang: string; tz: string; referrer: string; bot: boolean },
   ): Promise<ClickResult | null>
   addLocation(token: string, lat: number, lon: number): Promise<boolean>
   stats(code: string, token: string, tz: string): Promise<Stats | null>
@@ -150,6 +151,7 @@ export function parseStats(raw: unknown): Stats {
     disabled: bool(r.disabled),
     total: num(r.total),
     uniques: num(r.uniques),
+    bots: r.bots === undefined ? 0 : num(r.bots),
     firstAt: strOrNull(r.first_at),
     lastAt: strOrNull(r.last_at),
     byDay: list(r.by_day).map((e) => {

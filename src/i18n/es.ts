@@ -111,6 +111,8 @@ export const es = {
   answerTimes_other: 'Lo han abierto {n} veces,',
   answerPeople_one: 'una persona.',
   answerPeople_other: '{n} personas.',
+  botVisits_one: 'Una visita de bot, no contada.',
+  botVisits_other: '{n} visitas de bots, no contadas.',
   answerNone: 'Aún nadie lo ha abierto.',
   answerNoneSub: 'Cuando alguien lo abra, lo verás aquí.',
   lastFull: 'La última, {when}, desde {country} {device}.',

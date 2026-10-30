@@ -113,6 +113,8 @@ export const ca: Record<MessageKey, string> = {
   answerTimes_other: 'L’han obert {n} vegades,',
   answerPeople_one: 'una persona.',
   answerPeople_other: '{n} persones.',
+  botVisits_one: 'Una visita de bot, no comptada.',
+  botVisits_other: '{n} visites de bots, no comptades.',
   answerNone: 'Encara ningú no l’ha obert.',
   answerNoneSub: 'Quan algú l’obri, ho veuràs aquí.',
   lastFull: 'L’última, {when}, des de {country} {device}.',

@@ -286,6 +286,7 @@ describe('go view', () => {
       lang: navigator.language,
       tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
       referrer: document.referrer,
+      bot: false,
     })
   })
 
@@ -433,6 +434,15 @@ describe('go view', () => {
     )
     expect(h.redirect).toHaveBeenCalledTimes(1)
     expect(geolocation.getCurrentPosition.mock.calls[0]![2]).toMatchObject({ timeout: 10_000 })
+  })
+
+  it.each([true, false])('sends bot=%s from the webdriver flag', async (webdriver) => {
+    const fake = newFake()
+    const click = vi.spyOn(fake, 'click')
+    const { code } = await fake.create('https://example.com/', false, 'token')
+    h = mount({ hash: `#${code}`, fake, webdriver })
+    await settle()
+    expect(click.mock.calls[0]![1]).toMatchObject({ bot: webdriver })
   })
 
   it('lets the visitor continue without sharing', async () => {

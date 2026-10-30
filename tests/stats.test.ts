@@ -89,6 +89,21 @@ describe('stats view', () => {
     expect($(h.root, '.to').textContent).toContain('example.com/a?b=1')
   })
 
+  it.each([
+    [1, 'Una visita de bot, no contada.'],
+    [3, '3 visitas de bots, no contadas.'],
+  ])('says so when %i bot visits were left out', async (bots, text) => {
+    h = mount({ hash: HASH, api: serving(emptyStats({ bots })) })
+    await settle()
+    expect(h.root.textContent).toContain(text)
+  })
+
+  it('shows no bot line without bot visits', async () => {
+    h = mount({ hash: HASH, api: serving(emptyStats({ bots: 0 })) })
+    await settle()
+    expect(h.root.textContent).not.toContain('bot')
+  })
+
   it('does not import a link whose key is wrong', async () => {
     h = mount({ hash: HASH, api: serving(null) })
     await settle()
@@ -353,8 +368,8 @@ describe('links view', () => {
     const fake = newFake()
     const fresh = await fake.create('https://endika.dev/cv-2026.pdf', false, 'tok')
     const quiet = await fake.create('https://eslojusto.es/finiquito', false, 'tok')
-    await fake.click(fresh.code, { lang: 'es', tz: 'UTC', referrer: '' })
-    await fake.click(fresh.code, { lang: 'es', tz: 'UTC', referrer: '' })
+    await fake.click(fresh.code, { lang: 'es', tz: 'UTC', referrer: '', bot: false })
+    await fake.click(fresh.code, { lang: 'es', tz: 'UTC', referrer: '', bot: false })
     h = mount({ hash: '#/links', fake })
     saveLink(h.storage, { ...quiet, target: 'https://eslojusto.es/finiquito', createdAt: 'x' })
     saveLink(h.storage, { ...fresh, target: 'https://endika.dev/cv-2026.pdf', createdAt: 'x' })
