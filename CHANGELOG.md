@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0](https://github.com/Endika/txiki/compare/v0.7.0...v0.8.0) (2026-10-30)
+
+
+### Features
+
+* mark the stats key as private and explain both copies ([215663a](https://github.com/Endika/txiki/commit/215663ad7244aa96efea19b4b77a0cf229808dd5))
+
 ## [0.7.0](https://github.com/Endika/txiki/compare/v0.6.0...v0.7.0) (2026-10-30)
 
 
