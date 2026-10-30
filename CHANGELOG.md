@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/Endika/txiki/compare/v0.3.0...v0.4.0) (2026-10-30)
+
+
+### Features
+
+* add client api, saved links and routing ([cb14944](https://github.com/Endika/txiki/commit/cb149442d822f126841a73734ccc2efe0c6cb9d1))
+
 ## [0.3.0](https://github.com/Endika/txiki/compare/v0.2.0...v0.3.0) (2026-10-29)
 
 
