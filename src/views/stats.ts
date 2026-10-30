@@ -66,7 +66,7 @@ export function statsView(
   let focused = false
   let deleteFailed = false
   let mapView: WorldMap | null = null
-  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+  const { tz } = deps.client
 
   async function load(): Promise<void> {
     state = { kind: 'loading' }

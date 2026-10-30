@@ -34,9 +34,9 @@ export function goView(container: HTMLElement, deps: ViewDeps, code: string): Vi
     let pending = deps.clicks.get(code)
     if (!pending) {
       pending = deps.api.click(code, {
-        lang: navigator.language,
-        tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        referrer: document.referrer,
+        lang: deps.client.lang,
+        tz: deps.client.tz,
+        referrer: deps.client.referrer,
         bot: deps.webdriver,
       })
       deps.clicks.set(code, pending)
