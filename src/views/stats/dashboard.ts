@@ -9,6 +9,7 @@ import { copyButton, fallbackInput } from '../copy'
 import { charts, type MapHost } from './blocks'
 import { feed } from './feed'
 import { noteRow, type NoteHost } from './note'
+import { qrControl } from '../qr'
 
 export interface DashboardContext {
   code: string
@@ -37,6 +38,7 @@ function channelBuilder(code: string, base: string): HTMLElement {
   const fallback = fallbackInput('', t('channelTitle'))
   const note = h('p', { class: 'hint', role: 'status' })
   const slot = h('span', { class: 'chan-copy' })
+  const qr = qrControl()
   function update(): void {
     const channel = normalizeChannel(input.value)
     if (input.value !== channel) input.value = channel
@@ -45,6 +47,7 @@ function channelBuilder(code: string, base: string): HTMLElement {
     const button = copyButton(link, fallback, 'copy', note)
     button.disabled = channel === ''
     slot.replaceChildren(button)
+    qr.set(channel === '' ? null : { link, name: `txiki-${code}-${channel}` })
   }
   input.addEventListener('input', update)
   update()
@@ -52,7 +55,8 @@ function channelBuilder(code: string, base: string): HTMLElement {
     'div',
     { class: 'chan' },
     h('label', { for: 'channel' }, t('channelTitle')),
-    h('div', { class: 'chan-row' }, input, slot, fallback),
+    h('div', { class: 'chan-row' }, input, slot, qr.button, fallback),
+    qr.panel,
     h('p', { class: 'hint' }, t('channelHint')),
     note,
   )
@@ -66,6 +70,8 @@ export function dashboard(stats: Stats, ctx: DashboardContext): HTMLElement {
   const fallbackLink = fallbackInput(short, t('copyLink'))
   const fallbackKey = fallbackInput(key, t('copyKey'))
   const note = h('p', { class: 'hint', role: 'status' })
+  const qr = qrControl()
+  qr.set({ link: short, name: `txiki-${code}` })
   const last = lastClickSentence(stats, ctx.now)
   const answer =
     stats.total === 0
@@ -120,10 +126,12 @@ export function dashboard(stats: Stats, ctx: DashboardContext): HTMLElement {
         fallbackKey,
         copyButton(short, fallbackLink, 'copyLink', note),
         copyButton(key, fallbackKey, 'copyKey', note, 'lock'),
+        qr.button,
       ),
     ),
     h('p', { class: 'hint' }, t('keysHint')),
     note,
+    qr.panel,
     channelBuilder(code, base),
     stats.disabled ? h('p', { class: 'band', role: 'status' }, t('disabledBand')) : null,
     ...answer,
