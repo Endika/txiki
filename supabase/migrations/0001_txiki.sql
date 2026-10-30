@@ -50,6 +50,19 @@ revoke all on all tables in schema txiki from public, anon, authenticated, servi
 
 grant usage on schema txiki to anon, service_role;
 
+comment on column txiki.links.target is 'PII: destination URL chosen by the link creator';
+comment on column txiki.clicks.country is 'PII: country derived from the IP, which is discarded';
+comment on column txiki.clicks.browser is 'PII: browser family reduced from the user agent';
+comment on column txiki.clicks.os is 'PII: OS family reduced from the user agent';
+comment on column txiki.clicks.device is 'PII: device class reduced from the user agent';
+comment on column txiki.clicks.lang is 'PII: browser language';
+comment on column txiki.clicks.tz is 'PII: browser time zone';
+comment on column txiki.clicks.referrer_host is 'PII: referrer host only';
+comment on column txiki.clicks.visitor is 'PII: pseudonym, sha256 with a daily salt deleted the next day';
+comment on column txiki.clicks.lat is 'PII: latitude rounded to 2 decimals, only with explicit consent';
+comment on column txiki.clicks.lon is 'PII: longitude rounded to 2 decimals, only with explicit consent';
+comment on column txiki.create_log.ip_hash is 'PII: pseudonym, sha256 with a daily salt, kept 2 days for rate limiting';
+
 create function txiki.b64url(p_bytes bytea) returns text
 language sql
 immutable
