@@ -75,12 +75,26 @@ else
   node scripts/build-geo.mjs
 fi
 
+local_imports() {
+  grep -oE "from '(\.\./_shared/|\./)[A-Za-z0-9_-]+\.ts'" "$1" | sed -E "s#.*/([A-Za-z0-9_-]+\.ts)'#\1#" || true
+}
+
+# Every _shared file the function's index.ts reaches through relative imports.
 shared_for() {
-  case $1 in
-    txiki-create) echo "deps.ts env.ts handlers.ts request.ts ua.ts" ;;
-    txiki-click) echo "deps.ts env.ts handlers.ts request.ts ua.ts geo.ts geo-data.ts" ;;
-    *) echo "unknown function $1" >&2; return 1 ;;
-  esac
+  local f dep
+  local -a todo=() seen=() deps=()
+  [ -f "$FN_DIR/$1/index.ts" ] || { echo "unknown function $1" >&2; return 1; }
+  read -ra todo <<< "$(local_imports "$FN_DIR/$1/index.ts" | tr '\n' ' ')"
+  while [ ${#todo[@]} -gt 0 ]; do
+    f=${todo[0]}
+    todo=("${todo[@]:1}")
+    case " ${seen[*]} " in *" $f "*) continue ;; esac
+    [ -f "$FN_DIR/_shared/$f" ] || { echo "missing _shared/$f" >&2; return 1; }
+    seen+=("$f")
+    read -ra deps <<< "$(local_imports "$FN_DIR/_shared/$f" | tr '\n' ' ')"
+    for dep in "${deps[@]}"; do todo+=("$dep"); done
+  done
+  echo "${seen[@]}"
 }
 
 deploy() {
