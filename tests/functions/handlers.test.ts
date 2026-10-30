@@ -267,9 +267,33 @@ describe('handleClick', () => {
           p_lang: 'es-ES',
           p_tz: 'Europe/Madrid',
           p_referrer_host: 'news.example.org',
+          p_bot: false,
         },
       },
     ])
+  })
+
+  it('passes p_bot true when the page reports webdriver', async () => {
+    const { deps, calls } = makeDeps()
+    const res = await handleClick(post({ code: 'abc1234', bot: true }), deps)
+    expect(res.status).toBe(200)
+    expect(calls[0]?.args.p_bot).toBe(true)
+  })
+
+  it('passes p_bot true for a crawler user agent', async () => {
+    const { deps, calls } = makeDeps()
+    await handleClick(
+      post({ code: 'abc1234' }, { 'user-agent': 'Mozilla/5.0 (compatible; Googlebot/2.1)' }),
+      deps,
+    )
+    expect(calls[0]?.args.p_bot).toBe(true)
+  })
+
+  it.each([false, 'true', 1, null, {}])('only counts bot=true, not %j', async (bot) => {
+    const { deps, calls } = makeDeps()
+    const res = await handleClick(post({ code: 'abc1234', bot }), deps)
+    expect(res.status).toBe(200)
+    expect(calls[0]?.args.p_bot).toBe(false)
   })
 
   it('ignores non-string lang and tz', async () => {
