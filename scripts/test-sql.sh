@@ -25,4 +25,5 @@ $PSQL < supabase/tests/bootstrap.sql
 $PSQL < supabase/migrations/0001_txiki.sql
 $PSQL < supabase/migrations/0002_txiki_bots.sql
 $PSQL < supabase/migrations/0003_txiki_note.sql
+$PSQL < supabase/migrations/0004_txiki_dimensions.sql
 $PSQL < supabase/tests/txiki.sql

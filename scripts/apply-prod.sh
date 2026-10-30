@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Applies supabase/migrations/0001_txiki.sql, 0002_txiki_bots.sql and 0003_txiki_note.sql to production; safe to re-run.
+# Applies supabase/migrations/0001_txiki.sql to 0004_txiki_dimensions.sql to production; safe to re-run.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -34,22 +34,22 @@ get_db_schema() {
     | python3 -c 'import json,sys; print(json.load(sys.stdin)["db_schema"])'
 }
 
-echo "1/7 pre-check: does schema txiki exist?"
+echo "1/8 pre-check: does schema txiki exist?"
 count=$(printf '%s' "select count(*) from pg_namespace where nspname='txiki'" | q \
   | python3 -c 'import json,sys; print(json.load(sys.stdin)[0]["count"])')
 
 if [ "$count" != 0 ]; then
-  echo "2/7 schema exists, skipping DDL"
+  echo "2/8 schema exists, skipping DDL"
 else
-  echo "2/7 applying supabase/migrations/0001_txiki.sql"
+  echo "2/8 applying supabase/migrations/0001_txiki.sql"
   out=$(q < supabase/migrations/0001_txiki.sql)
   echo "    response: $out"
 fi
 
-echo "3/7 registering migration 0001"
+echo "3/8 registering migration 0001"
 printf '%s' "insert into supabase_migrations.schema_migrations(version, name) values ('20261030000000', 'txiki_0001') on conflict do nothing" | q > /dev/null
 
-echo "4/7 applying supabase/migrations/0002_txiki_bots.sql if needed"
+echo "4/8 applying supabase/migrations/0002_txiki_bots.sql if needed"
 has_bot=$(printf '%s' "select count(*) from information_schema.columns where table_schema='txiki' and table_name='clicks' and column_name='bot'" | q \
   | python3 -c 'import json,sys; print(json.load(sys.stdin)[0]["count"])')
 if [ "$has_bot" != 0 ]; then
@@ -60,7 +60,7 @@ else
   printf '%s' "insert into supabase_migrations.schema_migrations(version, name) values ('20261030120000', 'txiki_0002_bots') on conflict do nothing" | q > /dev/null
 fi
 
-echo "5/7 applying supabase/migrations/0003_txiki_note.sql if needed"
+echo "5/8 applying supabase/migrations/0003_txiki_note.sql if needed"
 has_note=$(printf '%s' "select count(*) from information_schema.columns where table_schema='txiki' and table_name='links' and column_name='note'" | q \
   | python3 -c 'import json,sys; print(json.load(sys.stdin)[0]["count"])')
 if [ "$has_note" != 0 ]; then
@@ -71,7 +71,18 @@ else
   printf '%s' "insert into supabase_migrations.schema_migrations(version, name) values ('20261031000000', 'txiki_0003_note') on conflict do nothing" | q > /dev/null
 fi
 
-echo "6/7 exposing schema txiki in PostgREST"
+echo "6/8 applying supabase/migrations/0004_txiki_dimensions.sql if needed"
+has_channel=$(printf '%s' "select count(*) from information_schema.columns where table_schema='txiki' and table_name='clicks' and column_name='channel'" | q \
+  | python3 -c 'import json,sys; print(json.load(sys.stdin)[0]["count"])')
+if [ "$has_channel" != 0 ]; then
+  echo "    column txiki.clicks.channel exists, skipping DDL"
+else
+  out=$(q < supabase/migrations/0004_txiki_dimensions.sql)
+  echo "    response: $out"
+  printf '%s' "insert into supabase_migrations.schema_migrations(version, name) values ('20261031120000', 'txiki_0004_dimensions') on conflict do nothing" | q > /dev/null
+fi
+
+echo "7/8 exposing schema txiki in PostgREST"
 current=$(get_db_schema)
 case ",$(printf '%s' "$current" | tr -d ' ')," in
   *,public,*) ;;
@@ -94,7 +105,7 @@ if [ "$after" != "$expected" ]; then
 fi
 echo "    db_schema: $after"
 
-echo "7/7 verifying"
+echo "8/8 verifying"
 checks=$(q <<'SQL'
 select
   not exists (
@@ -122,15 +133,27 @@ select
         'txiki.add_location(text,double precision,double precision)'::regprocedure))
   ) as no_other_function_execute,
   has_function_privilege('service_role', 'txiki.create_link(text,boolean,text)', 'execute') as service_create_link,
-  has_function_privilege('service_role', 'txiki.record_click(text,text,text,text,text,text,text,text,text,boolean)', 'execute') as service_record_click,
-  not has_function_privilege('anon', 'txiki.record_click(text,text,text,text,text,text,text,text,text,boolean)', 'execute') as anon_record_click,
+  has_function_privilege('service_role', 'txiki.record_click(text,text,text,text,text,text,text,text,text,boolean,text,text,text)', 'execute') as service_record_click,
+  not has_function_privilege('anon', 'txiki.record_click(text,text,text,text,text,text,text,text,text,boolean,text,text,text)', 'execute') as anon_record_click,
   exists (select 1 from information_schema.columns
           where table_schema = 'txiki' and table_name = 'clicks' and column_name = 'bot') as bot_column,
   exists (select 1 from information_schema.columns
           where table_schema = 'txiki' and table_name = 'links' and column_name = 'note') as note_column,
+  (select count(*) = 5 from information_schema.columns
+   where table_schema = 'txiki' and table_name = 'clicks'
+     and column_name in ('network', 'city', 'model', 'screen', 'channel')) as dimension_columns,
   coalesce((select bool_and(relrowsecurity) from pg_class
             where oid = any(array['txiki.links'::regclass, 'txiki.clicks'::regclass,
-                                  'txiki.create_log'::regclass, 'txiki.salts'::regclass])), false) as rls_on_all_tables,
+                                  'txiki.create_log'::regclass, 'txiki.salts'::regclass,
+                                  'txiki.asn_orgs'::regclass, 'txiki.asn_ranges'::regclass,
+                                  'txiki.city_es_ranges'::regclass])), false) as rls_on_all_tables,
+  not exists (
+    select 1
+    from unnest(array['anon','authenticated','service_role']) r,
+         unnest(array['asn_orgs','asn_ranges','city_es_ranges']) t,
+         unnest(array['select','insert','update','delete']) p
+    where has_table_privilege(r, 'txiki.' || t, p)
+  ) as no_grants_on_range_tables,
   exists (select 1 from cron.job where jobname = 'txiki-retention' and schedule = '30 3 * * *') as retention_cron
 SQL
 )
