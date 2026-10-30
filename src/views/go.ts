@@ -2,6 +2,7 @@ import { InvalidTargetError, type ClickResult } from '@/api'
 import { h, icon } from '@/dom'
 import { t } from '@/i18n'
 import { displayTarget } from '@/url'
+import { clickList } from './privacy'
 import type { View, ViewDeps } from './types'
 
 const LOCATION_TIMEOUT_MS = 10_000
@@ -157,7 +158,13 @@ export function goView(container: HTMLElement, deps: ViewDeps, code: string): Vi
               t('locSkip'),
             ),
             h('p', { class: 'fine' }, more),
-            h('p', { class: 'cap', id: 'loc-privacy', hidden: !privacyOpen }, t('privacyBody')),
+            h(
+              'div',
+              { class: 'cap', id: 'loc-privacy', hidden: !privacyOpen },
+              h('p', {}, t('privacyClickLead')),
+              clickList(),
+              h('p', {}, h('a', { href: '#/privacy' }, t('privacyFull'))),
+            ),
           ),
         )
         return

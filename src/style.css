@@ -605,6 +605,39 @@ legend {
   gap: 4px;
 }
 
+.how a,
+.fine a,
+.prv a,
+.cap a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.prv {
+  display: grid;
+  gap: 8px;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.prv h2 {
+  font-size: 14px;
+  line-height: 1.3;
+}
+
+.prv ul,
+.cap ul {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 6px;
+}
+
+.cap {
+  display: grid;
+  gap: 8px;
+}
+
 /* Mis links */
 .page-title {
   display: flex;

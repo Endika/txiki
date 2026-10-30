@@ -17,6 +17,17 @@ export const gl: Record<MessageKey, string> = {
     'A chave das estatísticas queda neste navegador. Quen a teña ve as métricas e pode borrar o link.',
   howLocation:
     'Se pides ubicación exacta, quen abre o link decide se a comparte. Gárdase cun quilómetro de marxe.',
+  howCode:
+    'O código do link vai despois do # (endika.github.io/txiki/#abc1234). A páxina é estática: ao abrirse, pídelle a unha función de Supabase que rexistre o clic e devolva o destino.',
+  howCountry:
+    'A IP chega a unha Edge Function, que saca o país dela e descártaa. A función non a garda nin a rexistra.',
+  howSalt:
+    'Os visitantes únicos cóntanse con sha256(sal do día ‖ IP ‖ categorías do navegador), truncado. O sal bórrase ao día seguinte.',
+  howHash:
+    'A chave das estatísticas son 32 bytes aleatorios; a base de datos só garda o seu hash SHA-256.',
+  howRls:
+    'As táboas teñen seguridade a nivel de fila (RLS) e ningún permiso para o navegador. Só pode executar tres funcións: ver estatísticas e borrar o link (as dúas esixen a chave) e engadir a ubicación (unha soa vez, nos 10 minutos seguintes ao clic).',
+  howSource: 'Código fonte en GitHub',
   howRetention: 'Os clics e os links sen actividade bórranse aos 12 meses.',
   createTitle: 'Acurta unha ligazón',
   createLead:
@@ -143,6 +154,49 @@ export const gl: Record<MessageKey, string> = {
     'Non hai ningún link con esta chave. Pode que se borrase ou que a chave estea incompleta.',
   statsGoneRemove: 'Quitar dos meus links',
   privacyTitle: 'Privacidade',
-  privacyBody:
-    'Por cada clic txiki garda o país, o navegador, o sistema, o tipo de dispositivo, o idioma, o fuso horario e a web de orixe. Non garda a IP nin usa cookies. Aínda estamos rematando de redactar o aviso completo.',
+  privacyUpdated: 'Última actualización: 2026-10-30',
+  privacyWhoTitle: 'Quen o xestiona',
+  privacyWho:
+    'txiki xestiónao Endika, a título persoal. Non hai correo de contacto: para dúbidas ou peticións, abre un issue no repositorio.',
+  privacyIssues: 'Abrir un issue en GitHub',
+  privacyClickTitle: 'Que se garda cando alguén abre un link',
+  privacyClickLead: 'Cando alguén abre un link curto, txiki garda isto:',
+  privacyClickCountry:
+    'O país. Calcúlase a partir da IP no servidor e a IP descártase nese mesmo momento.',
+  privacyClickDevice:
+    'O navegador, o sistema e o tipo de dispositivo, só como categorías («Firefox», «Android», «móbil»). Nunca o user-agent completo.',
+  privacyClickLang: 'O idioma e o fuso horario do navegador.',
+  privacyClickReferrer: 'A web da que ven, só o dominio.',
+  privacyClickVisitor:
+    'Un identificador de visitante pseudónimo, para contar persoas distintas. Calcúlase cun sal diario que se borra ao día seguinte: a partir de entón ninguén pode volvelo calcular.',
+  privacyClickLocation:
+    'Unha ubicación aproximada, cun quilómetro de marxe, só se o link a pide e quen o abre acepta compartila.',
+  privacyNotTitle: 'Que non se garda',
+  privacyNot:
+    'Non se gardan a IP nin o user-agent completo. Non hai cookies, nin analítica, nin contas.',
+  privacyCreateTitle: 'Que se garda cando creas un link',
+  privacyCreateTarget:
+    'A ligazón de destino, a data de creación e un hash SHA-256 da chave das estatísticas. A chave en si non se garda.',
+  privacyCreateRate:
+    'Un hash pseudónimo da túa IP durante 2 días, para limitar os links que podes crear por hora.',
+  privacyCreateLocal:
+    'Este navegador garda os teus links e as súas chaves en localStorage para amosarchos en «Os meus links». Quedan no teu dispositivo.',
+  privacyBasisTitle: 'Base legal',
+  privacyBasis:
+    'As estatísticas agregadas dun link baséanse no interese lexítimo de quen o comparte: é o que fai calquera acurtador e os datos son mínimos. A ubicación baséase no teu consentimento: podes rexeitala e o link ábrese igual.',
+  privacyProcTitle: 'Quen trata os datos',
+  privacyProcSupabase:
+    'Supabase: base de datos e funcións. A base de datos está en Londres (Reino Unido, con decisión de adecuación).',
+  privacyProcTurnstile:
+    'Cloudflare Turnstile: só na páxina de crear, para comprobar que es unha persoa. Estados Unidos, baixo o Marco de Privacidade de Datos UE-EUA.',
+  privacyProcPages:
+    'GitHub Pages: serve a páxina. Estados Unidos, baixo o mesmo marco. Pode rexistrar IP nos seus rexistros técnicos.',
+  privacyRetTitle: 'Canto tempo se garda',
+  privacyRet:
+    'Os clics e os links sen actividade, 12 meses. O rexistro de creación, 2 días. Os sales diarios, 1 día.',
+  privacyRightsTitle: 'Os teus dereitos e como borrar',
+  privacyRights:
+    'Quen creou un link pode borralo, con todos os seus clics, desde as súas estatísticas con «{delete}». Quen fixo clic non pode ser identificado polo servizo, porque non se garda nada que vincule o clic cunha persoa; por iso tampouco podemos buscar nin borrar «os seus» clics. Para calquera outra cousa, abre un issue.',
+  privacyAttr: 'Datos de IP a país de {link}, con licenza CC BY 4.0.',
+  privacyFull: 'Ler o aviso completo',
 }

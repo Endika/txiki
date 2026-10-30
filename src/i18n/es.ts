@@ -15,6 +15,17 @@ export const es = {
     'La llave de las estadísticas se queda en este navegador. Quien la tenga ve las métricas y puede borrar el link.',
   howLocation:
     'Si pides ubicación exacta, quien abre el link decide si la comparte. Se guarda con un kilómetro de margen.',
+  howCode:
+    'El código del link va tras el # (endika.github.io/txiki/#abc1234). La página es estática: al abrirse, pide a una función de Supabase que registre el clic y devuelva el destino.',
+  howCountry:
+    'La IP llega a una Edge Function, que saca de ella el país y la descarta. La función no la guarda ni la registra.',
+  howSalt:
+    'Los visitantes únicos se cuentan con sha256(sal del día ‖ IP ‖ categorías del navegador), truncado. La sal se borra al día siguiente.',
+  howHash:
+    'La llave de las estadísticas son 32 bytes aleatorios; la base de datos solo guarda su hash SHA-256.',
+  howRls:
+    'Las tablas tienen seguridad a nivel de fila (RLS) y ningún permiso para el navegador. Solo puede ejecutar tres funciones: ver estadísticas y borrar el link (las dos exigen la llave) y añadir la ubicación (una sola vez, en los 10 minutos siguientes al clic).',
+  howSource: 'Código fuente en GitHub',
   howRetention: 'Los clics y los links sin actividad se borran a los 12 meses.',
   createTitle: 'Acorta un enlace',
   createLead:
@@ -144,8 +155,51 @@ export const es = {
     'No hay ningún link con esta llave. Puede que se haya borrado o que la llave esté incompleta.',
   statsGoneRemove: 'Quitar de mis links',
   privacyTitle: 'Privacidad',
-  privacyBody:
-    'Por cada clic txiki guarda el país, el navegador, el sistema, el tipo de dispositivo, el idioma, la zona horaria y la web de origen. No guarda la IP ni usa cookies. Estamos terminando de redactar el aviso completo.',
+  privacyUpdated: 'Última actualización: 2026-10-30',
+  privacyWhoTitle: 'Quién lo gestiona',
+  privacyWho:
+    'txiki lo gestiona Endika, a título personal. No hay correo de contacto: para dudas o peticiones, abre un issue en el repositorio.',
+  privacyIssues: 'Abrir un issue en GitHub',
+  privacyClickTitle: 'Qué se guarda cuando alguien abre un link',
+  privacyClickLead: 'Cuando alguien abre un link corto, txiki guarda esto:',
+  privacyClickCountry:
+    'El país. Se calcula a partir de la IP en el servidor y la IP se descarta en ese mismo momento.',
+  privacyClickDevice:
+    'El navegador, el sistema y el tipo de dispositivo, solo como categorías («Firefox», «Android», «móvil»). Nunca el user-agent completo.',
+  privacyClickLang: 'El idioma y la zona horaria del navegador.',
+  privacyClickReferrer: 'La web de la que viene, solo el dominio.',
+  privacyClickVisitor:
+    'Un identificador de visitante seudónimo, para contar personas distintas. Se calcula con una sal diaria que se borra al día siguiente: a partir de entonces nadie puede volver a calcularlo.',
+  privacyClickLocation:
+    'Una ubicación aproximada, con un kilómetro de margen, solo si el link la pide y quien lo abre acepta compartirla.',
+  privacyNotTitle: 'Qué no se guarda',
+  privacyNot:
+    'No se guarda la IP ni el user-agent completo. No hay cookies, ni analítica, ni cuentas.',
+  privacyCreateTitle: 'Qué se guarda cuando creas un link',
+  privacyCreateTarget:
+    'El enlace de destino, la fecha de creación y un hash SHA-256 de la llave de las estadísticas. La llave en sí no se guarda.',
+  privacyCreateRate:
+    'Un hash seudónimo de tu IP durante 2 días, para limitar los links que puedes crear por hora.',
+  privacyCreateLocal:
+    'Este navegador guarda tus links y sus llaves en localStorage para mostrártelos en «Mis links». Se quedan en tu dispositivo.',
+  privacyBasisTitle: 'Base legal',
+  privacyBasis:
+    'Las estadísticas agregadas de un link se basan en el interés legítimo de quien lo comparte: es lo que hace cualquier acortador y los datos son mínimos. La ubicación se basa en tu consentimiento: puedes rechazarla y el link se abre igual.',
+  privacyProcTitle: 'Quién trata los datos',
+  privacyProcSupabase:
+    'Supabase: base de datos y funciones. La base de datos está en Londres (Reino Unido, con decisión de adecuación).',
+  privacyProcTurnstile:
+    'Cloudflare Turnstile: solo en la página de crear, para comprobar que eres una persona. EE. UU., bajo el Marco de Privacidad de Datos UE-EE. UU.',
+  privacyProcPages:
+    'GitHub Pages: sirve la página. EE. UU., bajo el mismo marco. Puede registrar IPs en sus registros técnicos.',
+  privacyRetTitle: 'Cuánto tiempo se guarda',
+  privacyRet:
+    'Los clics y los links sin actividad, 12 meses. El registro de creación, 2 días. Las sales diarias, 1 día.',
+  privacyRightsTitle: 'Tus derechos y cómo borrar',
+  privacyRights:
+    'Quien creó un link puede borrarlo, con todos sus clics, desde sus estadísticas con «{delete}». Quien hizo clic no puede ser identificado por el servicio, porque no se guarda nada que vincule el clic con una persona; por eso tampoco podemos buscar ni borrar «sus» clics. Para cualquier otra petición, abre un issue.',
+  privacyAttr: 'Datos de IP a país de {link}, con licencia CC BY 4.0.',
+  privacyFull: 'Leer el aviso completo',
 }
 
 export type MessageKey = keyof typeof es
