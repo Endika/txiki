@@ -29,6 +29,7 @@ export interface AppDeps {
   storage: Storage
   turnstile: (el: HTMLElement, callbacks: TurnstileCallbacks) => TurnstileHandle
   geolocation: Pick<Geolocation, 'getCurrentPosition'> | null
+  webdriver: boolean
   redirect: (url: string) => void
   confirm?: (message: string) => boolean
   now?: () => number
@@ -213,6 +214,7 @@ export function mountApp(root: HTMLElement, deps: AppDeps): () => void {
       storage: deps.storage,
       turnstile: deps.turnstile,
       geolocation: deps.geolocation,
+      webdriver: deps.webdriver,
       redirect: deps.redirect,
       confirm: deps.confirm ?? ((message) => window.confirm(message)),
       now: deps.now ?? Date.now,

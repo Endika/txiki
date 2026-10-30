@@ -37,6 +37,7 @@ export function goView(container: HTMLElement, deps: ViewDeps, code: string): Vi
         lang: navigator.language,
         tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
         referrer: document.referrer,
+        bot: deps.webdriver,
       })
       deps.clicks.set(code, pending)
       pending.catch(() => deps.clicks.delete(code))

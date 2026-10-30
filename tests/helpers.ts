@@ -34,6 +34,7 @@ export type Options = {
   api?: TxikiApi | null
   fake?: FakeApi
   geolocation?: Pick<Geolocation, 'getCurrentPosition'> | null
+  webdriver?: boolean
   turnstile?: TurnstileFn
   confirm?: boolean
   framed?: boolean
@@ -80,6 +81,7 @@ export function mount(options: Options = {}): Harness {
     storage,
     turnstile,
     geolocation: options.geolocation ?? null,
+    webdriver: options.webdriver ?? false,
     redirect,
     confirm,
     now: () => NOW,
@@ -111,6 +113,7 @@ export function emptyStats(overrides: Partial<Stats> = {}): Stats {
     disabled: false,
     total: 0,
     uniques: 0,
+    bots: 0,
     firstAt: null,
     lastAt: null,
     byDay: [],

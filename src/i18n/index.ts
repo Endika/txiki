@@ -50,7 +50,7 @@ export function t(key: MessageKey, params?: Record<string, string | number>): st
 }
 
 export function tCount(
-  base: 'answerTimes' | 'answerPeople' | 'mapInCountries' | 'mapInPlaces',
+  base: 'answerTimes' | 'answerPeople' | 'botVisits' | 'mapInCountries' | 'mapInPlaces',
   n: number,
 ): string {
   const category = new Intl.PluralRules(current).select(n) === 'one' ? 'one' : 'other'

@@ -111,6 +111,8 @@ export const en: Record<MessageKey, string> = {
   answerTimes_other: 'It has been opened {n} times,',
   answerPeople_one: 'by one person.',
   answerPeople_other: 'by {n} people.',
+  botVisits_one: 'One bot visit, not counted.',
+  botVisits_other: '{n} bot visits, not counted.',
   answerNone: 'Nobody has opened it yet.',
   answerNoneSub: 'When someone opens it, you will see it here.',
   lastFull: 'The last one was {when}, from {country} {device}.',
