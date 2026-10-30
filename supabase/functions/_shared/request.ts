@@ -1,4 +1,4 @@
-const ALLOWED_ORIGINS = new Set([
+export const ALLOWED_ORIGINS = new Set([
   'https://endika.github.io',
   'http://localhost:5173',
   'http://localhost:4173',
