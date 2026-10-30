@@ -346,11 +346,13 @@ legend {
 
 .copyrow {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
 .copyrow .field {
-  flex: 1;
+  flex: 1 1 120px;
+  min-width: 0;
 }
 
 .check {
@@ -763,7 +765,8 @@ a.li:hover {
   justify-content: flex-end;
   gap: 8px;
   flex-wrap: wrap;
-  flex: 0 0 auto;
+  flex: 0 1 auto;
+  min-width: 0;
 }
 
 .tag {
@@ -789,12 +792,14 @@ a.li:hover {
 
 .chan-row {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   align-items: center;
 }
 
 .chan-row .field {
-  flex: 1 1 0;
+  flex: 1 1 120px;
+  min-width: 0;
 }
 
 .chan-copy {
@@ -1278,4 +1283,34 @@ a.li:hover {
 .li .code.titled {
   font: 600 14px/1.35 var(--sans);
   overflow-wrap: anywhere;
+}
+
+.qr {
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.qr[hidden] {
+  display: none;
+}
+
+.qr svg {
+  display: block;
+  width: 100%;
+  max-width: 240px;
+  height: auto;
+  border: 1px solid var(--s-line-strong);
+  border-radius: 8px;
+}
+
+.qr-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.qr-actions [hidden] {
+  display: none;
 }

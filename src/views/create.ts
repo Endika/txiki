@@ -15,9 +15,11 @@ import { saveLink } from '@/storage'
 import type { TurnstileHandle } from '@/turnstile'
 import { displayUrl, normalizeUrl } from '@/url'
 import { copyButton, fallbackInput } from './copy'
+import { qrControl } from './qr'
 import type { View, ViewDeps } from './types'
 
 type Result = {
+  code: string
   link: string
   stats: string
   hash: string
@@ -129,6 +131,7 @@ export function createView(container: HTMLElement, deps: ViewDeps): View {
       handle?.remove()
       handle = null
       result = {
+        code: created.code,
         link: shortLink(created.code, base),
         stats: statsLink(created.code, created.token, base),
         hash: statsHash(created.code, created.token),
@@ -176,6 +179,8 @@ export function createView(container: HTMLElement, deps: ViewDeps): View {
     const linkFallback = fallbackInput(done.link, t('shortLinkLabel'))
     const keyFallback = fallbackInput(done.stats, t('keyLabel'))
     const linkNote = h('p', { class: 'hint', role: 'status' })
+    const qr = qrControl()
+    qr.set({ link: done.link, name: `txiki-${done.code}` })
     const keyNote = h('p', { class: 'hint', role: 'status' })
     const warning = done.saved
       ? h('p', { class: 'note', role: 'note' }, h('b', {}, t('keyNoteStrong')), ' ', t('keyNote'))
@@ -206,8 +211,10 @@ export function createView(container: HTMLElement, deps: ViewDeps): View {
             linkField,
             linkFallback,
             copyButton(done.link, linkFallback, 'copy', linkNote),
+            qr.button,
           ),
           linkNote,
+          qr.panel,
         ),
         done.note === null
           ? null
