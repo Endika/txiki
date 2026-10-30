@@ -42,7 +42,7 @@ export const ca: Record<MessageKey, string> = {
   readyLead:
     'Comparteix-lo on vulguis. Cada vegada que algú l’obri, ho veuràs a les seves estadístiques.',
   shortLinkLabel: 'Enllaç curt',
-  keyLabel: 'Clau de les estadístiques',
+  keyLabel: 'Clau privada de les estadístiques',
   copy: 'Copia',
   copied: 'Copiat',
   copyFailed: 'Seleccionat: prem Ctrl+C per copiar-lo.',
@@ -105,8 +105,10 @@ export const ca: Record<MessageKey, string> = {
   statsLoading: 'Carregant les estadístiques…',
   statsCreated: 'creat el {date}',
   statsAsksLocation: 'demana ubicació',
-  copyLink: 'Copia el link',
-  copyKey: 'Copia la clau',
+  copyLink: "Copia l'enllaç",
+  copyKey: 'Copia la clau privada',
+  keysHint:
+    "L'enllaç curt és per compartir. La clau és privada: amb ella es veuen aquestes estadístiques i es pot esborrar el link.",
   disabledBand:
     'Aquest link està desactivat i ja no redirigeix. Les seves estadístiques continuen disponibles.',
   answerTimes_one: 'L’han obert una vegada,',

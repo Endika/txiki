@@ -42,7 +42,7 @@ export const eu: Record<MessageKey, string> = {
   readyLead:
     'Partekatu nahi duzun lekuan. Norbaitek irekitzen duen bakoitzean, bere estatistiketan ikusiko duzu.',
   shortLinkLabel: 'Esteka laburra',
-  keyLabel: 'Estatistiken gakoa',
+  keyLabel: 'Estatistiken gako pribatua',
   copy: 'Kopiatu',
   copied: 'Kopiatuta',
   copyFailed: 'Hautatuta: sakatu Ctrl+C kopiatzeko.',
@@ -107,7 +107,9 @@ export const eu: Record<MessageKey, string> = {
   statsCreated: 'sortua: {date}',
   statsAsksLocation: 'kokapena eskatzen du',
   copyLink: 'Kopiatu esteka',
-  copyKey: 'Kopiatu gakoa',
+  copyKey: 'Kopiatu gako pribatua',
+  keysHint:
+    'Esteka laburra partekatzeko da. Gakoa pribatua da: harekin estatistika hauek ikusten dira eta esteka ezaba daiteke.',
   disabledBand:
     'Esteka hau desaktibatuta dago eta ez du birbideratzen. Bere estatistikak eskuragarri jarraitzen dute.',
   answerTimes_one: 'Behin ireki dute,',

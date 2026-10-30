@@ -41,7 +41,7 @@ export const en: Record<MessageKey, string> = {
   readyLead:
     'Share it wherever you like. Every time someone opens it, you will see it in its stats.',
   shortLinkLabel: 'Short link',
-  keyLabel: 'Stats key',
+  keyLabel: 'Private stats key',
   copy: 'Copy',
   copied: 'Copied',
   copyFailed: 'Selected: press Ctrl+C to copy.',
@@ -105,7 +105,9 @@ export const en: Record<MessageKey, string> = {
   statsCreated: 'created on {date}',
   statsAsksLocation: 'asks for location',
   copyLink: 'Copy link',
-  copyKey: 'Copy key',
+  copyKey: 'Copy private key',
+  keysHint:
+    'The short link is for sharing. The key is private: it opens these stats and can delete the link.',
   disabledBand: 'This link is disabled and no longer redirects. Its stats are still available.',
   answerTimes_one: 'It has been opened once,',
   answerTimes_other: 'It has been opened {n} times,',

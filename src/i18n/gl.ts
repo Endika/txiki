@@ -41,7 +41,7 @@ export const gl: Record<MessageKey, string> = {
   readyTitle: 'A túa ligazón está lista',
   readyLead: 'Compártea onde queiras. Cada vez que alguén a abra, verálo nas súas estatísticas.',
   shortLinkLabel: 'Ligazón curta',
-  keyLabel: 'Chave das estatísticas',
+  keyLabel: 'Chave privada das estatísticas',
   copy: 'Copiar',
   copied: 'Copiado',
   copyFailed: 'Seleccionado: preme Ctrl+C para copiar.',
@@ -102,8 +102,10 @@ export const gl: Record<MessageKey, string> = {
   statsLoading: 'Cargando as estatísticas…',
   statsCreated: 'creado o {date}',
   statsAsksLocation: 'pide ubicación',
-  copyLink: 'Copiar link',
-  copyKey: 'Copiar chave',
+  copyLink: 'Copiar ligazón',
+  copyKey: 'Copiar chave privada',
+  keysHint:
+    'A ligazón curta é para compartir. A chave é privada: con ela vense estas estatísticas e pódese borrar o link.',
   disabledBand:
     'Este link está desactivado e xa non redirixe. As súas estatísticas seguen dispoñibles.',
   answerTimes_one: 'Abríronno unha vez,',
