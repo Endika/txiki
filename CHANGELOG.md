@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.0](https://github.com/Endika/txiki/compare/v0.9.0...v0.10.0) (2026-10-30)
+
+
+### Features
+
+* **note:** encrypt notes client-side and add the set_note API ([313f9fb](https://github.com/Endika/txiki/commit/313f9fb6ea0a055b72ab587eb96ad8edb2567194))
+
 ## [0.9.0](https://github.com/Endika/txiki/compare/v0.8.1...v0.9.0) (2026-10-30)
 
 
