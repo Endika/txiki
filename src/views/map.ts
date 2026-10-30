@@ -5,18 +5,17 @@ import { clockTime, countryName, formatNumber } from '@/format'
 import { t, tCount } from '@/i18n'
 import {
   fitViewBox,
+  dotSize,
   groupPoints,
   project,
   tier,
+  tierRanges,
   type PointGroup,
   type ViewBox,
   type World,
 } from '@/map'
 
 const SVG_NS = 'http://www.w3.org/2000/svg'
-const TIERS = [1, 2, 3, 4] as const
-const MIN_DOT = 12
-const MAX_DOT = 24
 const GAP = 8
 
 export function osmLink(lat: number, lon: number, text: string): HTMLAnchorElement {
@@ -61,26 +60,10 @@ function summary(countries: number, places: number): string {
   return `${t('mapSummaryLead')} ${parts.join(` ${t('mapAnd')} `)}`
 }
 
-function tierRanges(max: number): { tier: number; label: string }[] {
-  const out: { tier: number; label: string }[] = []
-  for (const n of TIERS) {
-    const lo = Math.floor(((n - 1) * max) / 4) + 1
-    const hi = Math.floor((n * max) / 4)
-    if (hi < lo) continue
-    const label = lo === hi ? formatNumber(lo) : `${formatNumber(lo)}–${formatNumber(hi)}`
-    out.push({ tier: n, label })
-  }
-  return out
-}
-
 function svgEl(tag: string, attrs: Record<string, string>): SVGElement {
   const el = document.createElementNS(SVG_NS, tag)
   for (const [name, value] of Object.entries(attrs)) el.setAttribute(name, value)
   return el
-}
-
-function dotSize(count: number): number {
-  return Math.min(MAX_DOT, Math.round(MIN_DOT + 4 * Math.log2(count)))
 }
 
 function sameView(a: ViewBox, b: ViewBox): boolean {
