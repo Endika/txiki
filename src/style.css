@@ -777,6 +777,39 @@ a.li:hover {
   vertical-align: 2px;
 }
 
+.chan {
+  display: grid;
+  gap: 6px;
+}
+
+.chan label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.chan-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.chan-row .field {
+  flex: 1 1 0;
+}
+
+.chan-copy {
+  flex: 0 0 auto;
+}
+
+.chan button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.feed .tag {
+  margin-left: 2px;
+}
+
 .answer {
   font-size: 22px;
   line-height: 1.3;

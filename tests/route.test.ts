@@ -1,18 +1,47 @@
 import { describe, expect, it } from 'vitest'
-import { parseRoute, shortLink, statsHash, statsLink } from '@/route'
+import { normalizeChannel, parseRoute, shortLink, statsHash, statsLink } from '@/route'
 
 const TOKEN = 'A'.repeat(43)
 
 describe('parseRoute', () => {
   it('parses a short code', () => {
-    expect(parseRoute('#Ab3dE9x')).toEqual({ kind: 'go', code: 'Ab3dE9x' })
+    expect(parseRoute('#Ab3dE9x')).toEqual({ kind: 'go', code: 'Ab3dE9x', channel: null })
   })
   it.each(['#Ab3dE9x/', '#Ab3dE9x%20', '#Ab3dE9x?utm=1', '#Ab3dE9x ', '#Ab3dE9x.'])(
     'tolerates trailing junk in %s',
     (hash) => {
-      expect(parseRoute(hash)).toEqual({ kind: 'go', code: 'Ab3dE9x' })
+      expect(parseRoute(hash)).toEqual({ kind: 'go', code: 'Ab3dE9x', channel: null })
     },
   )
+  it('reads a channel and lowercases it', () => {
+    expect(parseRoute('#Ab3dE9x/instagram')).toEqual({
+      kind: 'go',
+      code: 'Ab3dE9x',
+      channel: 'instagram',
+    })
+    expect(parseRoute('#Ab3dE9x/Ig-Story-2')).toEqual({
+      kind: 'go',
+      code: 'Ab3dE9x',
+      channel: 'ig-story-2',
+    })
+    expect(parseRoute(`#Ab3dE9x/${'a'.repeat(24)}`)).toMatchObject({ channel: 'a'.repeat(24) })
+  })
+  it.each([
+    '#Ab3dE9x/',
+    `#Ab3dE9x/${'a'.repeat(25)}`,
+    '#Ab3dE9x/a_b',
+    '#Ab3dE9x/a b',
+    '#Ab3dE9x/ñ',
+    '#Ab3dE9x/a/b',
+    '#Ab3dE9x/a?x=1',
+  ])('keeps the go route but drops the invalid channel in %s', (hash) => {
+    expect(parseRoute(hash)).toEqual({ kind: 'go', code: 'Ab3dE9x', channel: null })
+  })
+  it('normalizes typed channels', () => {
+    expect(normalizeChannel(' Insta Gram!_ ')).toBe('-insta-gram-')
+    expect(normalizeChannel('a'.repeat(30))).toBe('a'.repeat(24))
+    expect(normalizeChannel('###')).toBe('')
+  })
   it('sends 8 base62 characters to home', () => {
     expect(parseRoute('#Ab3dE9xY')).toEqual({ kind: 'home' })
   })
@@ -58,6 +87,16 @@ describe('link builders', () => {
     expect(statsLink('Ab3dE9x', TOKEN, base)).toBe(
       `https://endika.github.io/txiki/#s/Ab3dE9x.${TOKEN}`,
     )
+  })
+  it('adds the channel to the short link', () => {
+    expect(shortLink('Ab3dE9x', base, 'instagram')).toBe(
+      'https://endika.github.io/txiki/#Ab3dE9x/instagram',
+    )
+    expect(parseRoute(new URL(shortLink('Ab3dE9x', base, 'tv-1')).hash)).toEqual({
+      kind: 'go',
+      code: 'Ab3dE9x',
+      channel: 'tv-1',
+    })
   })
   it('round-trips through parseRoute', () => {
     const hash = new URL(statsLink('Ab3dE9x', TOKEN, base)).hash

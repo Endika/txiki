@@ -18,6 +18,8 @@ export interface ViewDeps {
   redirect: (url: string) => void
   confirm: (message: string) => boolean
   now: () => number
+  deviceModel: () => Promise<string | null>
+  screenSize: () => { w: number; h: number }
   blank: (on: boolean) => void
   clicks: Map<string, Promise<ClickResult | null>>
 }

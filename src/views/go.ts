@@ -6,6 +6,7 @@ import { clickList } from './privacy'
 import type { View, ViewDeps } from './types'
 
 const LOCATION_TIMEOUT_MS = 10_000
+const MODEL_TIMEOUT_MS = 300
 
 type State =
   | { kind: 'loading' }
@@ -14,7 +15,24 @@ type State =
   | { kind: 'gone' }
   | { kind: 'ask'; click: ClickResult; waiting: boolean }
 
-export function goView(container: HTMLElement, deps: ViewDeps, code: string): View {
+async function modelWithin(deps: ViewDeps): Promise<string | null> {
+  let timer: ReturnType<typeof setTimeout> | undefined
+  const timeout = new Promise<null>((resolve) => {
+    timer = setTimeout(() => resolve(null), MODEL_TIMEOUT_MS)
+  })
+  try {
+    return await Promise.race([deps.deviceModel().catch(() => null), timeout])
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
+export function goView(
+  container: HTMLElement,
+  deps: ViewDeps,
+  code: string,
+  channel: string | null,
+): View {
   let state: State = { kind: 'loading' }
   let disposed = false
   let started = false
@@ -33,12 +51,17 @@ export function goView(container: HTMLElement, deps: ViewDeps, code: string): Vi
   function fetchClick(): Promise<ClickResult | null> {
     let pending = deps.clicks.get(code)
     if (!pending) {
-      pending = deps.api.click(code, {
-        lang: deps.client.lang,
-        tz: deps.client.tz,
-        referrer: deps.client.referrer,
-        bot: deps.webdriver,
-      })
+      pending = modelWithin(deps).then((model) =>
+        deps.api.click(code, {
+          lang: deps.client.lang,
+          tz: deps.client.tz,
+          referrer: deps.client.referrer,
+          bot: deps.webdriver,
+          channel,
+          screen: deps.screenSize(),
+          model,
+        }),
+      )
       deps.clicks.set(code, pending)
       pending.catch(() => deps.clicks.delete(code))
     }

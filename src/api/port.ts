@@ -25,6 +25,11 @@ export type Stats = {
   devices: Count[]
   referrers: Count[]
   langs: Count[]
+  networks: Count[]
+  cities: Count[]
+  models: Count[]
+  screens: Count[]
+  channels: Count[]
   recent: {
     at: string
     country: string | null
@@ -32,6 +37,9 @@ export type Stats = {
     os: string
     device: string
     referrerHost: string | null
+    network: string | null
+    city: string | null
+    channel: string | null
   }[]
   points: { lat: number; lon: number; at: string }[]
 }
@@ -44,7 +52,15 @@ export interface TxikiApi {
   ): Promise<{ code: string; token: string }>
   click(
     code: string,
-    ctx: { lang: string; tz: string; referrer: string; bot: boolean },
+    ctx: {
+      lang: string
+      tz: string
+      referrer: string
+      bot: boolean
+      channel?: string | null
+      screen?: { w: number; h: number }
+      model?: string | null
+    },
   ): Promise<ClickResult | null>
   addLocation(token: string, lat: number, lon: number): Promise<boolean>
   stats(code: string, token: string, tz: string): Promise<Stats | null>

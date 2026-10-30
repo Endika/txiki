@@ -158,6 +158,25 @@ export const ca: Record<MessageKey, string> = {
   other: 'Altres',
   direct: 'Directe',
   unknown: 'Desconegut',
+  blockChannels: 'Canals',
+  channelDirect: 'Directe (sense canal)',
+  blockNetworks: 'Xarxes',
+  unknownF: 'Desconeguda',
+  blockCities: 'Ciutats',
+  noteSpainOnly: 'Només Espanya',
+  cityElsewhere: 'Fora d’Espanya o desconeguda',
+  blockModels: 'Models',
+  noteAndroidChrome: 'Només Android amb Chrome',
+  blockScreens: 'Pantalles',
+  screenSmallPhone: 'Mòbil petit',
+  screenPhone: 'Mòbil',
+  screenTablet: 'Tauleta',
+  screenLaptop: 'Portàtil',
+  screenLarge: 'Pantalla gran',
+  channelTitle: 'Enllaç amb canal',
+  channelLabel: 'Canal',
+  channelPlaceholder: 'instagram',
+  channelHint: 'Mateix enllaç, una altra etiqueta: el tauler separa les visites per canal.',
   withDevices: 'Dispositius',
   withSystems: 'Sistemes',
   withLangs: 'Idiomes',
@@ -205,6 +224,14 @@ export const ca: Record<MessageKey, string> = {
     'Un identificador de visitant pseudònim, per comptar persones diferents. Es calcula amb una sal diària que s’esborra l’endemà: a partir d’aleshores ningú no el pot tornar a calcular.',
   privacyClickLocation:
     'Una ubicació aproximada, amb un quilòmetre de marge, només si el link la demana i qui l’obre accepta compartir-la.',
+  privacyClickNetwork:
+    'La xarxa o organització (per exemple, un operador o una empresa) i, només a Espanya, la ciutat. Es calculen a partir de la IP al servidor i la IP es descarta en aquell mateix moment.',
+  privacyClickModel:
+    'El model del dispositiu, només si el navegador el comunica (Chrome a Android).',
+  privacyClickScreen:
+    'La mida de la pantalla com a tram («mòbil», «tauleta», «portàtil»…), no les mesures exactes.',
+  privacyClickChannel:
+    'El canal, si el link que s’obre porta una etiqueta (per exemple, «instagram»).',
   privacyNotTitle: 'Què no es desa',
   privacyNot:
     'No es desen la IP ni l’user-agent complet. No hi ha galetes, ni analítica, ni comptes.',
@@ -233,6 +260,6 @@ export const ca: Record<MessageKey, string> = {
   privacyRightsTitle: 'Els teus drets i com esborrar',
   privacyRights:
     'Qui ha creat un link el pot esborrar, amb tots els seus clics, des de les estadístiques amb «{delete}». Qui ha fet clic no pot ser identificat pel servei, perquè no es desa res que vinculi el clic amb una persona; per això tampoc no podem buscar ni esborrar «els seus» clics. Per a qualsevol altra cosa, obre un issue.',
-  privacyAttr: 'Dades d’IP a país de {link}, amb llicència CC BY 4.0.',
+  privacyAttr: 'Dades d’IP a país, xarxa i ciutat de {link}, amb llicència CC BY 4.0.',
   privacyFull: 'Llegeix l’avís complet',
 }

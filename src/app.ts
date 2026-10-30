@@ -35,6 +35,8 @@ export interface AppDeps {
   languages: readonly string[]
   confirm: (message: string) => boolean
   now: () => number
+  deviceModel: () => Promise<string | null>
+  screenSize: () => { w: number; h: number }
   isFramed: () => boolean
 }
 
@@ -221,6 +223,8 @@ export function mountApp(root: HTMLElement, deps: AppDeps): () => void {
       client: deps.client,
       confirm: deps.confirm,
       now: deps.now,
+      deviceModel: deps.deviceModel,
+      screenSize: deps.screenSize,
       blank,
       clicks,
     }
@@ -228,7 +232,7 @@ export function mountApp(root: HTMLElement, deps: AppDeps): () => void {
       case 'links':
         return linksView(main, viewDeps)
       case 'go':
-        return goView(main, viewDeps, current.code)
+        return goView(main, viewDeps, current.code, current.channel)
       case 'stats':
         return statsView(main, viewDeps, current.code, current.token)
       default:

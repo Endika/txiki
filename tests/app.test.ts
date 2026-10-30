@@ -287,7 +287,49 @@ describe('go view', () => {
       tz: CLIENT.tz,
       referrer: CLIENT.referrer,
       bot: false,
+      channel: null,
+      screen: { w: 390, h: 844 },
+      model: null,
     })
+  })
+
+  it('sends the channel from the link, the screen size and the device model', async () => {
+    const fake = newFake()
+    const click = vi.spyOn(fake, 'click')
+    const { code } = await fake.create('https://example.com/', false, 'token')
+    h = mount({
+      hash: `#${code}/Instagram`,
+      fake,
+      deviceModel: async () => 'Pixel 8',
+      screenSize: { w: 412, h: 915 },
+    })
+    await settle()
+    expect(click.mock.calls[0]![1]).toMatchObject({
+      channel: 'instagram',
+      screen: { w: 412, h: 915 },
+      model: 'Pixel 8',
+    })
+    expect(h.redirect).toHaveBeenCalledWith('https://example.com/')
+  })
+
+  it.each([
+    ['a rejected', () => Promise.reject(new Error('blocked'))],
+    ['a never-resolving', () => new Promise<string | null>(() => {})],
+  ])('redirects after 300 ms at most with %s device model', async (_name, deviceModel) => {
+    vi.useFakeTimers()
+    try {
+      const fake = newFake()
+      const click = vi.spyOn(fake, 'click')
+      const { code } = await fake.create('https://example.com/', false, 'token')
+      h = mount({ hash: `#${code}`, fake, deviceModel })
+      await vi.advanceTimersByTimeAsync(299)
+      if (_name === 'a never-resolving') expect(h.redirect).not.toHaveBeenCalled()
+      await vi.advanceTimersByTimeAsync(2)
+      expect(h.redirect).toHaveBeenCalledWith('https://example.com/')
+      expect(click.mock.calls[0]![1].model).toBeNull()
+    } finally {
+      vi.useRealTimers()
+    }
   })
 
   it('sends the real referrer when the page has one', async () => {

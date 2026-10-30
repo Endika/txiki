@@ -50,6 +50,14 @@ function counts(v: unknown): Count[] {
   })
 }
 
+function optCounts(v: unknown): Count[] {
+  return v === undefined ? [] : counts(v)
+}
+
+function optStr(v: unknown): string | null {
+  return v === undefined ? null : strOrNull(v)
+}
+
 export function parseStats(raw: unknown): Stats {
   const r = rec(raw)
   const byHour = list(r.by_hour).map(num)
@@ -76,6 +84,11 @@ export function parseStats(raw: unknown): Stats {
     devices: counts(r.devices),
     referrers: counts(r.referrers),
     langs: counts(r.langs),
+    networks: optCounts(r.networks),
+    cities: optCounts(r.cities),
+    models: optCounts(r.models),
+    screens: optCounts(r.screens),
+    channels: optCounts(r.channels),
     recent: list(r.recent).map((e) => {
       const c = rec(e)
       return {
@@ -85,6 +98,9 @@ export function parseStats(raw: unknown): Stats {
         os: str(c.os),
         device: str(c.device),
         referrerHost: strOrNull(c.referrer_host),
+        network: optStr(c.network),
+        city: optStr(c.city),
+        channel: optStr(c.channel),
       }
     }),
     points: list(r.points).map((e) => {
@@ -175,7 +191,14 @@ export function createHttpApi(
       throw new RequestError(res.status)
     },
     async click(code, ctx) {
-      const res = await fn('txiki-click', { code, ...ctx })
+      const { channel, model, screen, ...rest } = ctx
+      const res = await fn('txiki-click', {
+        code,
+        ...rest,
+        ...(channel ? { channel } : {}),
+        ...(model ? { model } : {}),
+        ...(screen ? { screen } : {}),
+      })
       if (res.status === 404) return null
       if (res.status === 503) throw new NetworkError()
       if (res.status !== 200) throw new RequestError(res.status)

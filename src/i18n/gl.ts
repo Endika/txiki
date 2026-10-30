@@ -155,6 +155,25 @@ export const gl: Record<MessageKey, string> = {
   other: 'Outros',
   direct: 'Directo',
   unknown: 'Descoñecido',
+  blockChannels: 'Canles',
+  channelDirect: 'Directo (sen canle)',
+  blockNetworks: 'Redes',
+  unknownF: 'Descoñecida',
+  blockCities: 'Cidades',
+  noteSpainOnly: 'Só España',
+  cityElsewhere: 'Fóra de España ou descoñecida',
+  blockModels: 'Modelos',
+  noteAndroidChrome: 'Só Android con Chrome',
+  blockScreens: 'Pantallas',
+  screenSmallPhone: 'Móbil pequeno',
+  screenPhone: 'Móbil',
+  screenTablet: 'Tableta',
+  screenLaptop: 'Portátil',
+  screenLarge: 'Pantalla grande',
+  channelTitle: 'Ligazón cunha canle',
+  channelLabel: 'Canle',
+  channelPlaceholder: 'instagram',
+  channelHint: 'Mesma ligazón, outra etiqueta: o panel separa as visitas por canle.',
   withDevices: 'Dispositivos',
   withSystems: 'Sistemas',
   withLangs: 'Idiomas',
@@ -202,6 +221,13 @@ export const gl: Record<MessageKey, string> = {
     'Un identificador de visitante pseudónimo, para contar persoas distintas. Calcúlase cun sal diario que se borra ao día seguinte: a partir de entón ninguén pode volvelo calcular.',
   privacyClickLocation:
     'Unha ubicación aproximada, cun quilómetro de marxe, só se o link a pide e quen o abre acepta compartila.',
+  privacyClickNetwork:
+    'A rede ou organización (por exemplo, un operador ou unha empresa) e, só en España, a cidade. Calcúlanse a partir da IP no servidor e a IP descártase nese mesmo momento.',
+  privacyClickModel: 'O modelo do dispositivo, só se o navegador o comunica (Chrome en Android).',
+  privacyClickScreen:
+    'O tamaño da pantalla como tramo («móbil», «tableta», «portátil»…), non as medidas exactas.',
+  privacyClickChannel:
+    'A canle, se o link que se abre leva unha etiqueta (por exemplo, «instagram»).',
   privacyNotTitle: 'Que non se garda',
   privacyNot:
     'Non se gardan a IP nin o user-agent completo. Non hai cookies, nin analítica, nin contas.',
@@ -230,6 +256,6 @@ export const gl: Record<MessageKey, string> = {
   privacyRightsTitle: 'Os teus dereitos e como borrar',
   privacyRights:
     'Quen creou un link pode borralo, con todos os seus clics, desde as súas estatísticas con «{delete}». Quen fixo clic non pode ser identificado polo servizo, porque non se garda nada que vincule o clic cunha persoa; por iso tampouco podemos buscar nin borrar «os seus» clics. Para calquera outra cousa, abre un issue.',
-  privacyAttr: 'Datos de IP a país de {link}, con licenza CC BY 4.0.',
+  privacyAttr: 'Datos de IP a país, rede e cidade de {link}, con licenza CC BY 4.0.',
   privacyFull: 'Ler o aviso completo',
 }

@@ -3,6 +3,21 @@ import { createHttpApi } from '@/api/http'
 import { mountApp } from '@/app'
 import { renderTurnstile } from '@/turnstile'
 
+interface UserAgentData {
+  getHighEntropyValues(hints: string[]): Promise<{ model?: string }>
+}
+
+async function deviceModel(): Promise<string | null> {
+  const data = (navigator as Navigator & { userAgentData?: UserAgentData }).userAgentData
+  if (!data) return null
+  try {
+    const { model } = await data.getHighEntropyValues(['model'])
+    return model ? model : null
+  } catch {
+    return null
+  }
+}
+
 function safeStorage(): Storage {
   try {
     return localStorage
@@ -54,6 +69,8 @@ if (root) {
     languages: navigator.languages,
     confirm: (message) => window.confirm(message),
     now: Date.now,
+    deviceModel,
+    screenSize: () => ({ w: screen.width, h: screen.height }),
     isFramed,
   })
 }

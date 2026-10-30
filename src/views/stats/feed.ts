@@ -10,9 +10,11 @@ import { country, deviceLabel, plain } from './labels'
 export function feed(stats: Stats, now: number): HTMLElement[] {
   const { clicks, unmatched: extra } = pairClicksWithPoints(stats.recent, stats.points)
   const items = clicks.map(({ click: c, point }) => {
-    const parts: (string | Node)[] = [country(c.country), deviceLabel(c.device), plain(c.browser)]
+    const parts: string[] = [c.city ?? country(c.country), deviceLabel(c.device), plain(c.browser)]
+    if (c.network) parts.push(c.network)
     if (c.referrerHost) parts.push(t('viaWeb', { host: c.referrerHost }))
     const text = h('span', {}, parts.join(' · '))
+    if (c.channel) text.append(' ', h('span', { class: 'tag' }, c.channel))
     if (point) text.append(' · ', osmLink(point.lat, point.lon, t('mapLink')))
     return h('li', {}, h('time', { datetime: c.at }, clockTime(c.at, now)), text)
   })

@@ -2,7 +2,7 @@ import type { Stats } from '@/api/port'
 import { h } from '@/dom'
 import { shortDate } from '@/format'
 import { t, tCount } from '@/i18n'
-import { shortLink, statsLink } from '@/route'
+import { normalizeChannel, shortLink, statsLink } from '@/route'
 import { lastClickSentence } from '@/stats-logic'
 import { displayTarget } from '@/url'
 import { copyButton, fallbackInput } from '../copy'
@@ -20,6 +20,42 @@ export interface DashboardContext {
   onRemove: () => void
   map: MapHost
   note: NoteHost
+}
+
+function channelBuilder(code: string, base: string): HTMLElement {
+  const input = h('input', {
+    type: 'text',
+    id: 'channel',
+    class: 'field mono',
+    placeholder: t('channelPlaceholder'),
+    maxlength: '24',
+    autocomplete: 'off',
+    autocapitalize: 'none',
+    spellcheck: 'false',
+    'aria-label': t('channelLabel'),
+  })
+  const fallback = fallbackInput('', t('channelTitle'))
+  const note = h('p', { class: 'hint', role: 'status' })
+  const slot = h('span', { class: 'chan-copy' })
+  function update(): void {
+    const channel = normalizeChannel(input.value)
+    if (input.value !== channel) input.value = channel
+    const link = shortLink(code, base, channel)
+    fallback.value = link
+    const button = copyButton(link, fallback, 'copy', note)
+    button.disabled = channel === ''
+    slot.replaceChildren(button)
+  }
+  input.addEventListener('input', update)
+  update()
+  return h(
+    'div',
+    { class: 'chan' },
+    h('label', { for: 'channel' }, t('channelTitle')),
+    h('div', { class: 'chan-row' }, input, slot, fallback),
+    h('p', { class: 'hint' }, t('channelHint')),
+    note,
+  )
 }
 
 export function dashboard(stats: Stats, ctx: DashboardContext): HTMLElement {
@@ -88,6 +124,7 @@ export function dashboard(stats: Stats, ctx: DashboardContext): HTMLElement {
     ),
     h('p', { class: 'hint' }, t('keysHint')),
     note,
+    channelBuilder(code, base),
     stats.disabled ? h('p', { class: 'band', role: 'status' }, t('disabledBand')) : null,
     ...answer,
     stats.bots > 0

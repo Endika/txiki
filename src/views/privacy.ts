@@ -13,9 +13,13 @@ function list(keys: readonly MessageKey[]): HTMLElement {
 export function clickList(): HTMLElement {
   return list([
     'privacyClickCountry',
+    'privacyClickNetwork',
     'privacyClickDevice',
+    'privacyClickModel',
+    'privacyClickScreen',
     'privacyClickLang',
     'privacyClickReferrer',
+    'privacyClickChannel',
     'privacyClickVisitor',
     'privacyClickLocation',
   ])

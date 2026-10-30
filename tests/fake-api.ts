@@ -8,7 +8,16 @@ import {
   type TxikiApi,
 } from '@/api/port'
 
-type FakeClick = { at: string; lang: string; tz: string; referrer: string; bot: boolean }
+type FakeClick = {
+  at: string
+  lang: string
+  tz: string
+  referrer: string
+  bot: boolean
+  channel: string | null
+  model: string | null
+  screen: { w: number; h: number } | null
+}
 
 export type FakeLink = {
   code: string
@@ -104,6 +113,9 @@ export function createFakeApi(options: { now?: () => number } = {}): FakeApi {
         at: new Date(now()).toISOString(),
         ...ctx,
         referrer: referrerHost(ctx.referrer) ?? '',
+        channel: ctx.channel ?? null,
+        model: ctx.model ?? null,
+        screen: ctx.screen ?? null,
       })
       let locationToken: string | null = null
       if (link.askLocation && !ctx.bot) {
@@ -157,6 +169,11 @@ export function createFakeApi(options: { now?: () => number } = {}): FakeApi {
         devices: tally(clicks.map(() => 'desktop')),
         referrers: tally(clicks.map((c) => c.referrer || null)),
         langs: tally(clicks.map((c) => c.lang || null)),
+        networks: [],
+        cities: [],
+        models: tally(clicks.map((c) => c.model)),
+        screens: [],
+        channels: tally(clicks.map((c) => c.channel)),
         recent: clicks
           .slice(-50)
           .reverse()
@@ -167,6 +184,9 @@ export function createFakeApi(options: { now?: () => number } = {}): FakeApi {
             os: 'Other',
             device: 'desktop',
             referrerHost: c.referrer || null,
+            network: null,
+            city: null,
+            channel: c.channel,
           })),
         points: link.points.slice(0, 500),
       }

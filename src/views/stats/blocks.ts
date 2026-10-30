@@ -4,7 +4,17 @@ import { h } from '@/dom'
 import { dayLabel, localDay, shiftDay } from '@/format'
 import { getLocale, t, type MessageKey } from '@/i18n'
 import { worldMap, type WorldMap } from '../map'
-import { country, deviceLabel, language, plain } from './labels'
+import {
+  channel,
+  city,
+  country,
+  deviceLabel,
+  language,
+  model,
+  network,
+  plain,
+  screenLabel,
+} from './labels'
 
 const DAYS = 14
 
@@ -100,7 +110,36 @@ export function charts(stats: Stats, now: number, map: MapHost): HTMLElement[] {
       locale: getLocale(),
     }),
   )
-  return [days, hours, where, ...mapBlock(stats, now, map), withWhat, web]
+  return [
+    days,
+    hours,
+    ...listBlock(stats.channels, 'blockChannels', null, channel),
+    where,
+    ...mapBlock(stats, now, map),
+    withWhat,
+    web,
+    ...listBlock(stats.networks, 'blockNetworks', null, network),
+    ...listBlock(stats.cities, 'blockCities', 'noteSpainOnly', city),
+    ...listBlock(stats.models, 'blockModels', 'noteAndroidChrome', model),
+    ...listBlock(stats.screens, 'blockScreens', null, screenLabel),
+  ]
+}
+
+function listBlock(
+  items: BarItem[],
+  title: MessageKey,
+  note: MessageKey | null,
+  label: (key: string | null) => string,
+): HTMLElement[] {
+  if (items.length === 0) return []
+  return [
+    block(
+      'third',
+      t(title),
+      note ? t(note) : null,
+      barList(items, { label, otherLabel: t('other'), locale: getLocale() }),
+    ),
+  ]
 }
 
 function mapBlock(stats: Stats, now: number, host: MapHost): HTMLElement[] {
