@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.0](https://github.com/Endika/txiki/compare/v0.4.0...v0.5.0) (2026-10-30)
+
+
+### Features
+
+* add create and redirect views ([ce88215](https://github.com/Endika/txiki/commit/ce88215e9f5a7d3a5ba7efac62240c1170a6ef54))
+* add saved links and stats dashboard ([5e2c1a1](https://github.com/Endika/txiki/commit/5e2c1a1f63bf4766d0094786d29223e622cfaafa))
+
 ## [0.4.0](https://github.com/Endika/txiki/compare/v0.3.0...v0.4.0) (2026-10-30)
 
 
