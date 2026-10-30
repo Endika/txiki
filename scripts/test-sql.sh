@@ -23,4 +23,5 @@ fi
 
 $PSQL < supabase/tests/bootstrap.sql
 $PSQL < supabase/migrations/0001_txiki.sql
+$PSQL < supabase/migrations/0002_txiki_bots.sql
 $PSQL < supabase/tests/txiki.sql

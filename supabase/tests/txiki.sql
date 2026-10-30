@@ -429,13 +429,13 @@ begin
     = array['create_link', 'record_click'], 'service_role runs exactly two functions';
   assert not has_function_privilege('anon', 'txiki.create_link(text,bool,text)', 'execute'), 'anon create_link';
   assert not has_function_privilege('anon',
-    'txiki.record_click(text,text,text,text,text,text,text,text,text)', 'execute'), 'anon record_click';
+    'txiki.record_click(text,text,text,text,text,text,text,text,text,bool)', 'execute'), 'anon record_click';
   assert not has_function_privilege('anon', 'txiki.salt_for(date)', 'execute'), 'anon salt_for';
   assert not has_function_privilege('authenticated', 'txiki.create_link(text,bool,text)', 'execute'),
     'authenticated create_link';
   assert has_function_privilege('service_role', 'txiki.create_link(text,bool,text)', 'execute'), 'service create_link';
   assert has_function_privilege('service_role',
-    'txiki.record_click(text,text,text,text,text,text,text,text,text)', 'execute'), 'service record_click';
+    'txiki.record_click(text,text,text,text,text,text,text,text,text,bool)', 'execute'), 'service record_click';
   assert not has_function_privilege('service_role', 'txiki.link_stats(text,text,text)', 'execute'), 'service link_stats';
   assert has_function_privilege('anon', 'txiki.link_stats(text,text,text)', 'execute'), 'anon link_stats';
   assert has_function_privilege('anon', 'txiki.delete_link(text,text)', 'execute'), 'anon delete_link';
@@ -491,6 +491,46 @@ begin
   perform txiki.record_click(r.code, '1.1.1.1', 'xx', 'Other', 'Other', 'desktop', null, null, null);
   assert (select country from txiki.clicks) is null, 'invalid country is stored as null';
   raise notice 'PASS: truncation';
+end $$;
+
+do $$
+declare r record; c record; v_stats jsonb; v text;
+begin
+  perform t.reset();
+  select * into r from t.mk(true);
+
+  select * into c from txiki.record_click(r.code, '203.0.113.7', 'ES', 'Chrome', 'Android', 'mobile',
+    null, null, null, true);
+  assert c.ask_location and c.location_token is null, 'a bot gets no location token on an ask_location link';
+  assert c.target = 'https://example.com/a', 'a bot is still redirected';
+  assert (select bot from txiki.clicks) and (select location_token_hash from txiki.clicks) is null,
+    'bot click is stored with bot=true and no token hash';
+
+  select * into c from txiki.record_click(
+    p_code => r.code, p_ip => '203.0.113.8', p_country => 'ES', p_browser => 'Chrome', p_os => 'Android',
+    p_device => 'mobile', p_lang => null, p_tz => null, p_referrer_host => null);
+  assert c.location_token is not null, 'a call without p_bot still gets a token';
+  assert (select count(*) from txiki.clicks where not bot) = 1, 'a call without p_bot stores bot=false';
+
+  set role anon;
+  v_stats := txiki.link_stats(r.code, r.token, 'UTC');
+  v := t.err('select * from txiki.record_click(''' || r.code || ''', ''1.1.1.1'', null, null, null, null, null, null, null, true)');
+  reset role;
+  assert (v_stats->>'total')::int = 1 and (v_stats->>'uniques')::int = 1, 'bots are not counted in total or uniques';
+  assert (v_stats->>'bots')::int = 1, 'bots are reported';
+  assert (select sum((e->>'count')::int) from jsonb_array_elements(v_stats->'browsers') e) = 1
+    and jsonb_array_length(v_stats->'recent') = 1
+    and (select sum(x::int) from jsonb_array_elements_text(v_stats->'by_hour') x) = 1,
+    'bots are excluded from lists and charts';
+  assert v like 'permission denied%', 'anon cannot call record_click: ' || coalesce(v, 'no error');
+
+  update txiki.clicks set bot = true, at = now() - interval '13 months';
+  execute (select command from cron.job where jobname = 'txiki-retention');
+  assert not exists (select 1 from txiki.clicks), 'retention deletes bot rows too';
+  select * into c from txiki.record_click(r.code, '203.0.113.7', null, 'Chrome', 'Android', 'mobile', null, null, null, true);
+  assert txiki.delete_link(r.code, r.token), 'delete_link finds the link';
+  assert not exists (select 1 from txiki.clicks), 'delete_link removes bot rows';
+  raise notice 'PASS: bots';
 end $$;
 
 select t.reset();
