@@ -17,6 +17,17 @@ export const eu: Record<MessageKey, string> = {
     'Estatistiken gakoa nabigatzaile honetan geratzen da. Gakoa duenak neurketak ikus ditzake eta esteka ezabatu dezake.',
   howLocation:
     'Kokapen zehatza eskatzen baduzu, estekaren irekitzaileak erabakitzen du partekatzen duen ala ez. Kilometro bateko marjinarekin gordetzen da.',
+  howCode:
+    'Estekaren kodea #-ren ondoren doa (endika.github.io/txiki/#abc1234). Orria estatikoa da: irekitzean, Supabaseko funtzio bati eskatzen dio klika erregistratzeko eta helburua itzultzeko.',
+  howCountry:
+    'IPa Edge Function batera iristen da; hark herrialdea ateratzen du eta IPa baztertzen du. Funtzioak ez du gordetzen ez erregistratzen.',
+  howSalt:
+    'Bisitari bakarrak sha256(eguneko gatza ‖ IPa ‖ nabigatzailearen kategoriak) bidez zenbatzen dira, laburtuta. Gatza hurrengo egunean ezabatzen da.',
+  howHash:
+    'Estatistiken gakoa 32 byte aleatorio da; datu-baseak haren SHA-256 hash-a bakarrik gordetzen du.',
+  howRls:
+    'Taulek errenkada-mailako segurtasuna (RLS) dute, eta nabigatzaileak ez du baimenik. Hiru funtzio bakarrik exekutatu ditzake: estatistikak ikusi eta esteka ezabatu (biek gakoa behar dute) eta kokapena gehitu (behin, klikaren ondorengo 10 minututan).',
+  howSource: 'Iturburu-kodea GitHuben',
   howRetention: 'Klikak eta jarduerarik gabeko estekak 12 hilabetera ezabatzen dira.',
   createTitle: 'Laburtu esteka bat',
   createLead:
@@ -40,11 +51,11 @@ export const eu: Record<MessageKey, string> = {
     'Nabigatzaile honek gogoratzen du, baina beste toki batetik neurketak ikusteko modu bakarra da. Ez partekatu: duenak datuak ikusten ditu eta esteka ezabatu dezake.',
   notSavedStrong: 'Nabigatzaile honek ez du esteka gordeko.',
   notSavedNote:
-    'Ezin ditu datuak gorde (modu pribatua?). Kopiatu gakoa orain: hori gabe ezingo dituzu neurketak ikusi ez esteka ezabatu.',
+    'Ezin ditu datuak gorde (modu pribatua?). Kopiatu gakoa orain: hori gabe ezingo dituzu neurketak ikusi, ezta esteka ezabatu ere.',
   viewStats: 'Ikusi estatistikak',
   createAnother: 'Laburtu beste bat',
   errInvalidUrl:
-    'Esteka horrek ez du balio. http:// edo https:// hasi behar du, ezin du erabiltzailerik edo pasahitzik eduki eta ezin da txikiren esteka bat izan.',
+    'Esteka horrek ez du balio. http:// edo https:// hitzekin hasi behar du, ezin du erabiltzailerik edo pasahitzik eduki eta ezin da txikiren esteka bat izan.',
   errCaptcha:
     'Ezin izan dugu egiaztatu pertsona zarenik. Bete egiaztapen berria eta sakatu berriro «Laburtu».',
   errCaptchaLoad:
@@ -93,7 +104,7 @@ export const eu: Record<MessageKey, string> = {
   linkUnavailable: 'ez dago eskuragarri',
   statsBack: '← Nire estekak',
   statsLoading: 'Estatistikak kargatzen…',
-  statsCreated: '{date}(e)an sortua',
+  statsCreated: 'sortua: {date}',
   statsAsksLocation: 'kokapena eskatzen du',
   copyLink: 'Kopiatu esteka',
   copyKey: 'Kopiatu gakoa',
@@ -147,6 +158,49 @@ export const eu: Record<MessageKey, string> = {
     'Ez dago gako horrekin estekarik. Baliteke ezabatuta egotea edo gakoa osatu gabe egotea.',
   statsGoneRemove: 'Kendu nire esteketatik',
   privacyTitle: 'Pribatutasuna',
-  privacyBody:
-    'Klik bakoitzeko, txikik herrialdea, nabigatzailea, sistema, gailu mota, hizkuntza, ordu-zona eta jatorrizko webgunea gordetzen ditu. Ez du IPrik gordetzen eta ez du cookierik erabiltzen. Oraindik jakinarazpen osoa idazten ari gara.',
+  privacyUpdated: 'Azken eguneratzea: 2026-10-30',
+  privacyWhoTitle: 'Nork kudeatzen duen',
+  privacyWho:
+    'txiki Endikak kudeatzen du, norbanako gisa. Ez dago harremanetarako posta elektronikorik: zalantzak edo eskaerak badituzu, ireki issue bat biltegian.',
+  privacyIssues: 'Ireki issue bat GitHuben',
+  privacyClickTitle: 'Zer gordetzen den norbaitek esteka bat irekitzen duenean',
+  privacyClickLead: 'Norbaitek esteka labur bat irekitzen duenean, txikik hau gordetzen du:',
+  privacyClickCountry:
+    'Herrialdea. Zerbitzarian kalkulatzen da IPtik abiatuta, eta IPa une horretan bertan baztertzen da.',
+  privacyClickDevice:
+    'Nabigatzailea, sistema eta gailu mota, kategoria gisa soilik («Firefox», «Android», «mugikorra»). Inoiz ez user-agent osoa.',
+  privacyClickLang: 'Nabigatzailearen hizkuntza eta ordu-zona.',
+  privacyClickReferrer: 'Nondik datorren webgunea, domeinua bakarrik.',
+  privacyClickVisitor:
+    'Bisitari-identifikatzaile ezizendatu bat, pertsona desberdinak zenbatzeko. Eguneko gatz batekin kalkulatzen da, eta gatza hurrengo egunean ezabatzen da: harrezkero inork ezin du berriz kalkulatu.',
+  privacyClickLocation:
+    'Gutxi gorabeherako kokapena, kilometro bateko marjinarekin, estekak eskatzen badu eta irekitzen duenak partekatzea onartzen badu soilik.',
+  privacyNotTitle: 'Zer ez den gordetzen',
+  privacyNot:
+    'Ez dira gordetzen IPa eta user-agent osoa. Ez dago cookierik, analitikarik edo konturik.',
+  privacyCreateTitle: 'Zer gordetzen den esteka bat sortzen duzunean',
+  privacyCreateTarget:
+    'Helburuko URLa, sortze-data eta estatistiken gakoaren SHA-256 hash bat. Gakoa bera ez da gordetzen.',
+  privacyCreateRate:
+    'Zure IParen hash ezizendatu bat 2 egunez, orduko sor ditzakezun estekak mugatzeko.',
+  privacyCreateLocal:
+    'Nabigatzaile honek zure estekak eta haien gakoak localStorage-n gordetzen ditu, «Nire estekak» atalean erakusteko. Zure gailuan geratzen dira.',
+  privacyBasisTitle: 'Oinarri juridikoa',
+  privacyBasis:
+    'Esteka baten estatistika agregatuak partekatzen duenaren interes legitimoan oinarritzen dira: edozein esteka-laburtzailek egiten du hori, eta datuak minimoak dira. Kokapena zure baimenean oinarritzen da: uko egin diezaiokezu, eta esteka hala ere irekitzen da.',
+  privacyProcTitle: 'Nork tratatzen dituen datuak',
+  privacyProcSupabase:
+    'Supabase: datu-basea eta funtzioak. Datu-basea Londresen dago (Erresuma Batua, egokitasun-erabakiarekin).',
+  privacyProcTurnstile:
+    'Cloudflare Turnstile: sortzeko orrian bakarrik, pertsona zarela egiaztatzeko. AEB, EB-AEB Datuen Pribatutasun Esparruaren babesean.',
+  privacyProcPages:
+    'GitHub Pages: orria zerbitzatzen du. AEB, esparru beraren babesean. IPak erregistra ditzake bere erregistro teknikoetan.',
+  privacyRetTitle: 'Zenbat denboran gordetzen den',
+  privacyRet:
+    'Klikak eta jarduerarik gabeko estekak, 12 hilabete. Sortze-erregistroa, 2 egun. Eguneko gatzak, egun 1.',
+  privacyRightsTitle: 'Zure eskubideak eta nola ezabatu',
+  privacyRights:
+    'Esteka bat sortu duenak ezaba dezake, bere klik guztiekin, estatistiketatik «{delete}» sakatuta. Klik egin duena ezin du zerbitzuak identifikatu, ez baita klika pertsona batekin lotzen duen daturik gordetzen; horregatik ezin ditugu «haren» klikak bilatu edo ezabatu. Gainerako guztirako, ireki issue bat.',
+  privacyAttr: 'IP-herrialde datuak: {link}, CC BY 4.0 lizentziapean.',
+  privacyFull: 'Irakurri jakinarazpen osoa',
 }

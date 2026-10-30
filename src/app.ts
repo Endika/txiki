@@ -132,10 +132,21 @@ export function mountApp(root: HTMLElement, deps: AppDeps): () => void {
       h(
         'ul',
         {},
-        ...(['howCount', 'howKey', 'howLocation', 'howRetention'] as const).map((key) =>
-          h('li', {}, t(key)),
-        ),
+        ...(
+          [
+            'howCount',
+            'howCountry',
+            'howCode',
+            'howSalt',
+            'howKey',
+            'howHash',
+            'howRls',
+            'howLocation',
+            'howRetention',
+          ] as const
+        ).map((key) => h('li', {}, t(key))),
       ),
+      h('p', {}, h('a', { href: SOURCE_URL, rel: 'noopener noreferrer' }, t('howSource'))),
     )
     footer.replaceChildren(
       panel,

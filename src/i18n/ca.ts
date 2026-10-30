@@ -17,6 +17,17 @@ export const ca: Record<MessageKey, string> = {
     'La clau de les estadístiques es queda en aquest navegador. Qui la tingui veu les mètriques i pot esborrar el link.',
   howLocation:
     'Si demanes ubicació exacta, qui obre el link decideix si la comparteix. Es desa amb un quilòmetre de marge.',
+  howCode:
+    'El codi del link va després del # (endika.github.io/txiki/#abc1234). La pàgina és estàtica: quan s’obre, demana a una funció de Supabase que registri el clic i retorni la destinació.',
+  howCountry:
+    'La IP arriba a una Edge Function, que en treu el país i la descarta. La funció no la desa ni la registra.',
+  howSalt:
+    'Els visitants únics es compten amb sha256(sal del dia ‖ IP ‖ categories del navegador), truncat. La sal s’esborra l’endemà.',
+  howHash:
+    'La clau de les estadístiques són 32 bytes aleatoris; la base de dades només en guarda el hash SHA-256.',
+  howRls:
+    'Les taules tenen seguretat a nivell de fila (RLS) i cap permís per al navegador. Només pot executar tres funcions: veure estadístiques i esborrar el link (totes dues exigeixen la clau) i afegir la ubicació (una sola vegada, en els 10 minuts següents al clic).',
+  howSource: 'Codi font a GitHub',
   howRetention: 'Els clics i els links sense activitat s’esborren als 12 mesos.',
   createTitle: 'Escurça un enllaç',
   createLead:
@@ -146,6 +157,49 @@ export const ca: Record<MessageKey, string> = {
     'No hi ha cap link amb aquesta clau. Pot ser que s’hagi esborrat o que la clau estigui incompleta.',
   statsGoneRemove: 'Treu-lo dels meus links',
   privacyTitle: 'Privadesa',
-  privacyBody:
-    'Per cada clic txiki desa el país, el navegador, el sistema, el tipus de dispositiu, l’idioma, la zona horària i el web d’origen. No desa la IP ni fa servir galetes. Encara estem acabant de redactar l’avís complet.',
+  privacyUpdated: 'Darrera actualització: 2026-10-30',
+  privacyWhoTitle: 'Qui ho gestiona',
+  privacyWho:
+    'txiki el gestiona l’Endika, a títol personal. No hi ha correu de contacte: per a dubtes o peticions, obre un issue al repositori.',
+  privacyIssues: 'Obre un issue a GitHub',
+  privacyClickTitle: 'Què es desa quan algú obre un link',
+  privacyClickLead: 'Quan algú obre un link curt, txiki desa això:',
+  privacyClickCountry:
+    'El país. Es calcula a partir de la IP al servidor i la IP es descarta en aquell mateix moment.',
+  privacyClickDevice:
+    'El navegador, el sistema i el tipus de dispositiu, només com a categories («Firefox», «Android», «mòbil»). Mai l’user-agent complet.',
+  privacyClickLang: 'L’idioma i la zona horària del navegador.',
+  privacyClickReferrer: 'El web d’on ve, només el domini.',
+  privacyClickVisitor:
+    'Un identificador de visitant pseudònim, per comptar persones diferents. Es calcula amb una sal diària que s’esborra l’endemà: a partir d’aleshores ningú no el pot tornar a calcular.',
+  privacyClickLocation:
+    'Una ubicació aproximada, amb un quilòmetre de marge, només si el link la demana i qui l’obre accepta compartir-la.',
+  privacyNotTitle: 'Què no es desa',
+  privacyNot:
+    'No es desen la IP ni l’user-agent complet. No hi ha galetes, ni analítica, ni comptes.',
+  privacyCreateTitle: 'Què es desa quan crees un link',
+  privacyCreateTarget:
+    'L’enllaç de destinació, la data de creació i un hash SHA-256 de la clau de les estadístiques. La clau en si no es desa.',
+  privacyCreateRate:
+    'Un hash pseudònim de la teva IP durant 2 dies, per limitar els links que pots crear per hora.',
+  privacyCreateLocal:
+    'Aquest navegador desa els teus links i les seves claus a localStorage per mostrar-te’ls a «Els meus links». Es queden al teu dispositiu.',
+  privacyBasisTitle: 'Base legal',
+  privacyBasis:
+    'Les estadístiques agregades d’un link es basen en l’interès legítim de qui el comparteix: és el que fa qualsevol escurçador i les dades són mínimes. La ubicació es basa en el teu consentiment: la pots rebutjar i el link s’obre igualment.',
+  privacyProcTitle: 'Qui tracta les dades',
+  privacyProcSupabase:
+    'Supabase: base de dades i funcions. La base de dades és a Londres (Regne Unit, amb decisió d’adequació).',
+  privacyProcTurnstile:
+    'Cloudflare Turnstile: només a la pàgina de crear, per comprovar que ets una persona. Estats Units, sota el Marc de Privacitat de Dades UE-EUA.',
+  privacyProcPages:
+    'GitHub Pages: serveix la pàgina. Estats Units, sota el mateix marc. Pot registrar IP als seus registres tècnics.',
+  privacyRetTitle: 'Quant de temps es desa',
+  privacyRet:
+    'Els clics i els links sense activitat, 12 mesos. El registre de creació, 2 dies. Les sals diàries, 1 dia.',
+  privacyRightsTitle: 'Els teus drets i com esborrar',
+  privacyRights:
+    'Qui ha creat un link el pot esborrar, amb tots els seus clics, des de les estadístiques amb «{delete}». Qui ha fet clic no pot ser identificat pel servei, perquè no es desa res que vinculi el clic amb una persona; per això tampoc no podem buscar ni esborrar «els seus» clics. Per a qualsevol altra cosa, obre un issue.',
+  privacyAttr: 'Dades d’IP a país de {link}, amb llicència CC BY 4.0.',
+  privacyFull: 'Llegeix l’avís complet',
 }

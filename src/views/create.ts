@@ -266,6 +266,7 @@ export function createView(container: HTMLElement, deps: ViewDeps): View {
       retry,
       problem,
       submitBtn,
+      h('p', { class: 'fine' }, h('a', { href: '#/privacy' }, t('locWhatSaved'))),
     )
     form.addEventListener('submit', (event) => {
       event.preventDefault()

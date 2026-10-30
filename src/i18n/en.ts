@@ -17,6 +17,16 @@ export const en: Record<MessageKey, string> = {
     'The stats key stays in this browser. Whoever has it can see the numbers and delete the link.',
   howLocation:
     'If you ask for an exact location, whoever opens the link decides whether to share it. It is stored with a margin of about a kilometre.',
+  howCode:
+    'The link code goes after the # (endika.github.io/txiki/#abc1234). The page is static: when it opens, it asks a Supabase function to record the click and return the destination.',
+  howCountry:
+    'The IP reaches an Edge Function, which works out the country from it and discards it. The function never stores or logs it.',
+  howSalt:
+    'Unique visitors are counted with sha256(daily salt ‖ IP ‖ browser categories), truncated. The salt is deleted the next day.',
+  howHash: 'The stats key is 32 random bytes; the database only holds its SHA-256 hash.',
+  howRls:
+    'The tables have row-level security (RLS) and no permissions for the browser. It can only run three functions: view stats and delete the link (both need the key) and add the location (once, within 10 minutes of the click).',
+  howSource: 'Source code on GitHub',
   howRetention: 'Clicks and links with no activity are deleted after 12 months.',
   createTitle: 'Shorten a link',
   createLead:
@@ -60,7 +70,7 @@ export const en: Record<MessageKey, string> = {
   framedTitle: 'Open this link directly',
   framedBody: 'For your safety, txiki does not run inside another page.',
   framedOpen: 'Open link',
-  locTitle: 'Do you share where you open this link from?',
+  locTitle: 'Share where you are opening this link from?',
   locLead:
     'Whoever sent it to you will see your approximate location, within about a kilometre. If you would rather not share it, the link opens anyway.',
   locDest: 'You are going to',
@@ -115,10 +125,10 @@ export const en: Record<MessageKey, string> = {
   deviceDesktop: 'Computer',
   blockDays: 'By day',
   blockDaysNote: 'last {n}',
-  blockHours: 'At what time',
+  blockHours: 'What time of day',
   blockHoursNote: 'your time',
   blockWhere: 'From where',
-  blockWith: 'With what',
+  blockWith: 'Using what',
   blockWeb: 'From which website',
   blockRecent: 'Latest clicks',
   blockRecentPlaces: 'location shared in {n}',
@@ -145,6 +155,49 @@ export const en: Record<MessageKey, string> = {
     'There is no link with this key. It may have been deleted, or the key may be incomplete.',
   statsGoneRemove: 'Remove from my links',
   privacyTitle: 'Privacy',
-  privacyBody:
-    'For each click txiki stores the country, browser, system, device type, language, time zone and the website it came from. It does not store the IP address or use cookies. We are still writing the full notice.',
+  privacyUpdated: 'Last updated: 2026-10-30',
+  privacyWhoTitle: 'Who runs it',
+  privacyWho:
+    'txiki is run by Endika, personally. There is no contact email: for questions or requests, open an issue on the repository.',
+  privacyIssues: 'Open an issue on GitHub',
+  privacyClickTitle: 'What is stored when someone opens a link',
+  privacyClickLead: 'When someone opens a short link, txiki stores this:',
+  privacyClickCountry:
+    'The country. It is worked out from the IP address on the server, and the IP is discarded right then.',
+  privacyClickDevice:
+    'The browser, the system and the device type, only as categories (“Firefox”, “Android”, “phone”). Never the full user agent.',
+  privacyClickLang: 'The browser’s language and time zone.',
+  privacyClickReferrer: 'The website they came from, domain only.',
+  privacyClickVisitor:
+    'A pseudonymous visitor ID, to count distinct people. It is computed with a daily salt that is deleted the next day, after which nobody can compute it again.',
+  privacyClickLocation:
+    'An approximate location, within about a kilometre, only if the link asks for it and the person opening it agrees to share it.',
+  privacyNotTitle: 'What is not stored',
+  privacyNot:
+    'The IP address and the full user agent are not stored. There are no cookies, no analytics and no accounts.',
+  privacyCreateTitle: 'What is stored when you create a link',
+  privacyCreateTarget:
+    'The destination URL, the creation date and a SHA-256 hash of the stats key. The key itself is not stored.',
+  privacyCreateRate:
+    'A pseudonymous hash of your IP for 2 days, to limit how many links you can create per hour.',
+  privacyCreateLocal:
+    'This browser keeps your links and their keys in localStorage to show them in “My links”. They stay on your device.',
+  privacyBasisTitle: 'Legal basis',
+  privacyBasis:
+    'The aggregate stats of a link rest on the legitimate interest of whoever shares it: any link shortener does this, and the data is minimal. The location rests on your consent: you can refuse it and the link still opens.',
+  privacyProcTitle: 'Who processes the data',
+  privacyProcSupabase:
+    'Supabase: database and functions. The database is in London (United Kingdom, under an adequacy decision).',
+  privacyProcTurnstile:
+    'Cloudflare Turnstile: only on the create page, to check that you are a person. United States, under the EU-US Data Privacy Framework.',
+  privacyProcPages:
+    'GitHub Pages: serves the page. United States, under the same framework. It may log IP addresses in its technical logs.',
+  privacyRetTitle: 'How long it is kept',
+  privacyRet:
+    'Clicks and links with no activity, 12 months. The creation log, 2 days. The daily salts, 1 day.',
+  privacyRightsTitle: 'Your rights and how to delete',
+  privacyRights:
+    'Whoever created a link can delete it, with all its clicks, from its stats with “{delete}”. Whoever clicked cannot be identified by the service, because nothing is stored that ties a click to a person; for the same reason we cannot look up or delete “their” clicks. For anything else, open an issue.',
+  privacyAttr: 'IP to country data by {link}, under a CC BY 4.0 licence.',
+  privacyFull: 'Read the full notice',
 }

@@ -70,12 +70,6 @@ describe('shell', () => {
     expect($(h.root, 'h1').textContent).toBe('Acurta unha ligazón')
   })
 
-  it('shows the privacy placeholder at #/privacy', () => {
-    h = mount({ hash: '#/privacy' })
-    expect($(h.root, 'h1').textContent).toBe(t('privacyTitle'))
-    expect(h.root.querySelectorAll('main p')).toHaveLength(1)
-  })
-
   it('explains a missing server configuration', () => {
     h = mount({ api: null })
     expect($(h.root, '[role=alert]').textContent).toBe(t('errConfig'))
@@ -343,7 +337,8 @@ describe('go view', () => {
     expect($(h.root, '#loc-privacy').hidden).toBe(true)
     more.click()
     expect($(h.root, '#loc-privacy').hidden).toBe(false)
-    expect($(h.root, '#loc-privacy').textContent).toBe(t('privacyBody'))
+    expect($(h.root, '#loc-privacy').textContent).toContain(t('privacyClickVisitor'))
+    expect($(h.root, '#loc-privacy a').getAttribute('href')).toBe('#/privacy')
     expect($(h.root, '.fine button').getAttribute('aria-expanded')).toBe('true')
     expect($(h.root, 'h1').textContent).toBe(t('locTitle'))
     expect(h.redirect).not.toHaveBeenCalled()
