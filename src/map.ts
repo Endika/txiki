@@ -1,3 +1,5 @@
+import { formatNumber } from '@/format'
+
 export type ViewBox = [x: number, y: number, width: number, height: number]
 
 export interface World {
@@ -67,4 +69,24 @@ export function fitViewBox(groups: PointGroup[], world: World): ViewBox {
 export function tier(count: number, max: number): 0 | 1 | 2 | 3 | 4 {
   if (count <= 0 || max <= 0) return 0
   return Math.min(4, Math.max(1, Math.ceil((count / max) * 4))) as 1 | 2 | 3 | 4
+}
+
+const TIERS = [1, 2, 3, 4] as const
+const MIN_DOT = 12
+const MAX_DOT = 24
+
+export function tierRanges(max: number): { tier: number; label: string }[] {
+  const out: { tier: number; label: string }[] = []
+  for (const n of TIERS) {
+    const lo = Math.floor(((n - 1) * max) / 4) + 1
+    const hi = Math.floor((n * max) / 4)
+    if (hi < lo) continue
+    const label = lo === hi ? formatNumber(lo) : `${formatNumber(lo)}–${formatNumber(hi)}`
+    out.push({ tier: n, label })
+  }
+  return out
+}
+
+export function dotSize(count: number): number {
+  return Math.min(MAX_DOT, Math.round(MIN_DOT + 4 * Math.log2(count)))
 }

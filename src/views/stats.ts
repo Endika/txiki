@@ -7,12 +7,12 @@ import {
   dayLabel,
   languageName,
   localDay,
-  relativeTime,
   shiftDay,
   shortDate,
 } from '@/format'
 import { getLocale, t, tCount, type MessageKey } from '@/i18n'
 import { shortLink, statsLink } from '@/route'
+import { lastClickSentence, pairClicksWithPoints } from '@/stats-logic'
 import { loadLinks, removeLink, saveLink } from '@/storage'
 import { displayTarget } from '@/url'
 import { copyButton, fallbackInput } from './copy'
@@ -29,12 +29,6 @@ const DEVICE_LABEL: Record<string, MessageKey> = {
   tablet: 'deviceTablet',
   desktop: 'deviceDesktop',
 }
-const DEVICE_PHRASE: Record<string, MessageKey> = {
-  mobile: 'devicePhraseMobile',
-  tablet: 'devicePhraseTablet',
-  desktop: 'devicePhraseDesktop',
-}
-
 function deviceLabel(device: string): string {
   const key = DEVICE_LABEL[device]
   return key ? t(key) : device
@@ -110,19 +104,6 @@ export function statsView(
     }
     removeLink(deps.storage, code)
     if (!disposed) deps.location.hash = '#/links'
-  }
-
-  function sentence(stats: Stats): string | null {
-    if (!stats.lastAt) return null
-    const when = relativeTime(stats.lastAt, deps.now())
-    const latest = stats.recent[0]
-    const place = latest?.country ? countryName(latest.country) : null
-    const phraseKey = latest ? DEVICE_PHRASE[latest.device] : undefined
-    const device = phraseKey ? t(phraseKey) : null
-    if (place && device) return t('lastFull', { when, country: place, device })
-    if (place) return t('lastCountry', { when, country: place })
-    if (device) return t('lastDevice', { when, device })
-    return t('lastOnly', { when })
   }
 
   function block(
@@ -242,18 +223,14 @@ export function statsView(
 
   function feed(stats: Stats): HTMLElement[] {
     const now = deps.now()
-    const byTime = new Map(stats.points.map((p) => [p.at, p]))
-    const shown = new Set<string>()
-    const items = stats.recent.map((c) => {
+    const { clicks, unmatched: extra } = pairClicksWithPoints(stats.recent, stats.points)
+    const items = clicks.map(({ click: c, point }) => {
       const parts: (string | Node)[] = [country(c.country), deviceLabel(c.device), plain(c.browser)]
       if (c.referrerHost) parts.push(t('viaWeb', { host: c.referrerHost }))
-      const point = byTime.get(c.at)
-      if (point) shown.add(c.at)
       const text = h('span', {}, parts.join(' · '))
       if (point) text.append(' · ', osmLink(point.lat, point.lon, t('mapLink')))
       return h('li', {}, h('time', { datetime: c.at }, clockTime(c.at, now)), text)
     })
-    const extra = stats.points.filter((p) => !shown.has(p.at))
     const out = [
       block(
         '',
@@ -293,7 +270,7 @@ export function statsView(
     const fallbackLink = fallbackInput(short, t('copyLink'))
     const fallbackKey = fallbackInput(key, t('copyKey'))
     const note = h('p', { class: 'hint', role: 'status' })
-    const last = sentence(stats)
+    const last = lastClickSentence(stats, deps.now())
     const answer =
       stats.total === 0
         ? [

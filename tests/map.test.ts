@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { fitViewBox, groupPoints, project, tier, type World } from '@/map'
+import { dotSize, fitViewBox, groupPoints, project, tier, tierRanges, type World } from '@/map'
+import { setLocale } from '@/i18n'
 import { WORLD } from '@/world-data'
 
 const world: World = { viewBox: [-180, -84, 360, 144], countries: [] }
@@ -104,6 +105,43 @@ describe('tier', () => {
     expect(tier(51, 100)).toBe(3)
     expect(tier(75, 100)).toBe(3)
     expect(tier(76, 100)).toBe(4)
+  })
+})
+
+describe('tierRanges', () => {
+  it.each([
+    [1, [{ tier: 4, label: '1' }]],
+    [
+      2,
+      [
+        { tier: 2, label: '1' },
+        { tier: 4, label: '2' },
+      ],
+    ],
+    [
+      100,
+      [
+        { tier: 1, label: '1–25' },
+        { tier: 2, label: '26–50' },
+        { tier: 3, label: '51–75' },
+        { tier: 4, label: '76–100' },
+      ],
+    ],
+  ])('labels the quartiles for a maximum of %i', (max, expected) => {
+    setLocale('es')
+    expect(tierRanges(max)).toEqual(expected)
+  })
+})
+
+describe('dotSize', () => {
+  it.each([
+    [1, 12],
+    [2, 16],
+    [4, 20],
+    [8, 24],
+    [1000, 24],
+  ])('sizes %i clicks as %ipx, capped at 24', (count, size) => {
+    expect(dotSize(count)).toBe(size)
   })
 })
 
