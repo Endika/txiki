@@ -1,4 +1,4 @@
-import type { Stats } from '@/api'
+import type { Stats } from '@/api/port'
 import { OTHER_KEY, barList, collapse, dayLine, hourColumns, type BarItem } from '@/charts'
 import { h, icon } from '@/dom'
 import {

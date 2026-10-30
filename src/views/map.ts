@@ -1,4 +1,4 @@
-import type { Stats } from '@/api'
+import type { Stats } from '@/api/port'
 import { OTHER_KEY } from '@/charts'
 import { h } from '@/dom'
 import { clockTime, countryName, formatNumber } from '@/format'

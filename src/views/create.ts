@@ -5,7 +5,7 @@ import {
   NetworkError,
   RateLimitedError,
   RequestError,
-} from '@/api'
+} from '@/api/port'
 import { h, icon } from '@/dom'
 import { t, type MessageKey } from '@/i18n'
 import { shortLink, statsHash, statsLink } from '@/route'
