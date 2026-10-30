@@ -1,3 +1,4 @@
+import { screenClass } from './screen.ts'
 import { isBot, parseUserAgent } from './ua.ts'
 import { RPC_ERRORS } from './rpc-errors.ts'
 import { clientIp, corsHeaders, referrerHost } from './request.ts'
@@ -10,6 +11,24 @@ export type Deps = {
 
 const MAX_BODY_BYTES = 8 * 1024
 const CODE_RE = /^[0-9A-Za-z]{7}$/
+const MODEL_RE = /^[A-Za-z0-9 ._+()-]+$/
+const CHANNEL_RE = /^[a-z0-9-]{1,24}$/
+
+function cleanModel(value: unknown): string | null {
+  if (typeof value !== 'string') return null
+  const model = value.trim()
+  return model.length >= 1 && model.length <= 40 && MODEL_RE.test(model) ? model : null
+}
+
+function cleanChannel(value: unknown): string | null {
+  return typeof value === 'string' && CHANNEL_RE.test(value) ? value : null
+}
+
+function cleanScreen(value: unknown): string | null {
+  if (typeof value !== 'object' || value === null) return null
+  const { w, h } = value as Record<string, unknown>
+  return screenClass(w, h)
+}
 
 function json(origin: string | null, status: number, body: unknown): Response {
   return new Response(JSON.stringify(body), {
@@ -144,7 +163,7 @@ export async function handleClick(
   if (early) return early
   const body = await readBody(req, origin)
   if (!body.ok) return body.res
-  const { code, lang, tz, referrer, bot } = body.value
+  const { code, lang, tz, referrer, bot, model, screen, channel } = body.value
   if (typeof code !== 'string' || !CODE_RE.test(code)) {
     return json(origin, 404, { error: 'not_found' })
   }
@@ -164,6 +183,9 @@ export async function handleClick(
         p_tz: typeof tz === 'string' ? tz : null,
         p_referrer_host: referrerHost(referrer),
         p_bot: isBot(userAgent, bot === true),
+        p_model: cleanModel(model),
+        p_screen: cleanScreen(screen),
+        p_channel: cleanChannel(channel),
       }),
     )
     if (!row) return json(origin, 404, { error: 'not_found' })

@@ -269,6 +269,9 @@ describe('handleClick', () => {
           p_tz: 'Europe/Madrid',
           p_referrer_host: 'news.example.org',
           p_bot: false,
+          p_model: null,
+          p_screen: null,
+          p_channel: null,
         },
       },
     ])
@@ -295,6 +298,66 @@ describe('handleClick', () => {
     const res = await handleClick(post({ code: 'abc1234', bot }), deps)
     expect(res.status).toBe(200)
     expect(calls[0]?.args.p_bot).toBe(false)
+  })
+
+  it('passes model, screen class and channel when valid', async () => {
+    const { deps, calls } = makeDeps()
+    const res = await handleClick(
+      post({
+        code: 'abc1234',
+        model: '  Pixel 8 (Pro)  ',
+        screen: { w: 412, h: 915 },
+        channel: 'qr-flyer',
+      }),
+      deps,
+    )
+    expect(res.status).toBe(200)
+    expect(calls[0]?.args).toMatchObject({
+      p_model: 'Pixel 8 (Pro)',
+      p_screen: 'phone',
+      p_channel: 'qr-flyer',
+    })
+  })
+
+  it.each([5, '', '   ', 'a'.repeat(41), 'x<script>', 'Pixel\u00e9', null, {}])(
+    'treats model %j as absent',
+    async (model) => {
+      const { deps, calls } = makeDeps()
+      const res = await handleClick(post({ code: 'abc1234', model }), deps)
+      expect(res.status).toBe(200)
+      expect(calls[0]?.args.p_model).toBeNull()
+    },
+  )
+
+  it.each(['Flyer', 'a b', '', 'a'.repeat(25), 'under_score', 7, null])(
+    'treats channel %j as absent',
+    async (channel) => {
+      const { deps, calls } = makeDeps()
+      const res = await handleClick(post({ code: 'abc1234', channel }), deps)
+      expect(res.status).toBe(200)
+      expect(calls[0]?.args.p_channel).toBeNull()
+    },
+  )
+
+  it.each([
+    'phone',
+    [375, 667],
+    { w: '375', h: 667 },
+    { w: 375 },
+    { w: 0, h: 0 },
+    { w: 99999, h: 800 },
+    null,
+  ])('treats screen %j as absent', async (screen) => {
+    const { deps, calls } = makeDeps()
+    const res = await handleClick(post({ code: 'abc1234', screen }), deps)
+    expect(res.status).toBe(200)
+    expect(calls[0]?.args.p_screen).toBeNull()
+  })
+
+  it('classifies a desktop window by its long side', async () => {
+    const { deps, calls } = makeDeps()
+    await handleClick(post({ code: 'abc1234', screen: { w: 1366, h: 768 } }), deps)
+    expect(calls[0]?.args.p_screen).toBe('laptop')
   })
 
   it('ignores non-string lang and tz', async () => {
