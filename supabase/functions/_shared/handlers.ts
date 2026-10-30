@@ -1,4 +1,5 @@
 import { isBot, parseUserAgent } from './ua.ts'
+import { RPC_ERRORS } from './rpc-errors.ts'
 import { clientIp, corsHeaders, referrerHost } from './request.ts'
 
 export type Deps = {
@@ -79,9 +80,12 @@ function firstRow(data: unknown): Record<string, unknown> | null {
 function failure(origin: string | null, fn: string, err: unknown): Response {
   const message = err instanceof Error ? err.message : ''
   if (fn === 'create_link') {
-    if (message.includes('invalid target')) return json(origin, 400, { error: 'invalid_url' })
-    if (message.includes('rate limited')) return json(origin, 429, { error: 'rate_limited' })
-    if (message.includes('capacity reached')) return json(origin, 503, { error: 'capacity' })
+    if (message.includes(RPC_ERRORS.invalidTarget))
+      return json(origin, 400, { error: 'invalid_url' })
+    if (message.includes(RPC_ERRORS.rateLimited))
+      return json(origin, 429, { error: 'rate_limited' })
+    if (message.includes(RPC_ERRORS.capacityReached))
+      return json(origin, 503, { error: 'capacity' })
   }
   console.error(`rpc ${fn} failed`)
   return json(origin, 500, { error: 'server' })

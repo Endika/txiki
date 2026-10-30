@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { RPC_ERRORS } from '../../supabase/functions/_shared/rpc-errors'
 import { handleClick, handleCreate, type Deps } from '../../supabase/functions/_shared/handlers'
 
 const IPV4 = '203.0.113.7'
@@ -160,9 +161,9 @@ describe('handleCreate', () => {
   })
 
   it.each([
-    ['invalid target', 400, 'invalid_url'],
-    ['rate limited', 429, 'rate_limited'],
-    ['capacity reached', 503, 'capacity'],
+    [RPC_ERRORS.invalidTarget, 400, 'invalid_url'],
+    [RPC_ERRORS.rateLimited, 429, 'rate_limited'],
+    [RPC_ERRORS.capacityReached, 503, 'capacity'],
     ['boom', 500, 'server'],
   ])('maps rpc error %s to %i', async (message, status, error) => {
     vi.spyOn(console, 'error').mockImplementation(() => {})
@@ -399,7 +400,7 @@ describe('privacy', () => {
       const res = [
         await handleCreate(post(createBody, h), ok),
         await handleCreate(post(createBody, h), bad),
-        await handleCreate(post(createBody, h), makeDeps(rpcFails('rate limited')).deps),
+        await handleCreate(post(createBody, h), makeDeps(rpcFails(RPC_ERRORS.rateLimited)).deps),
         await handleClick(post({ code: 'abc1234' }, h), ok),
         await handleClick(post({ code: 'abc1234' }, h), bad),
         await handleClick(post({ code: 'abc1234' }, h), makeDeps({ rpc: async () => [] }).deps),
