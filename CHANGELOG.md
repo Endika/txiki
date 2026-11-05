@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.2](https://github.com/Endika/txiki/compare/v0.14.1...v0.14.2) (2026-11-05)
+
+
+### Bug Fixes
+
+* **deps:** override minimatch to ^11.0.1 ([8b4e500](https://github.com/Endika/txiki/commit/8b4e5008f50e9b0c3deab2c1027cb3b8873c28dc))
+
 ## [0.14.1](https://github.com/Endika/txiki/compare/v0.14.0...v0.14.1) (2026-10-30)
 
 
